@@ -10,6 +10,7 @@ entity projeto_uc is
         distancia_fim_medida        : in  std_logic;
         tx_pronto                   : in  std_logic;
         timer_fim_2_seg             : in  std_logic;
+        interrompido                : in  std_logic;
 
         contador_posicao_conta      : out std_logic;
         contador_posicao_zera       : out std_logic;
@@ -64,6 +65,7 @@ begin
         when inicia_transmissao                 =>  Eprox <= aguarda_transmissao;
         when aguarda_transmissao                =>  if tx_pronto='0'                    then    Eprox <= aguarda_transmissao;
                                                     elsif contador_transmissao_fim='0'  then    Eprox <= incrementa_contador_transmissao;
+                                                    elsif interrompido='1'              then    Eprox <= zera_timer;
                                                     else                                        Eprox <= move_servo_motor;
                                                     end if;
         when move_servo_motor                   =>  Eprox <= zera_timer;
