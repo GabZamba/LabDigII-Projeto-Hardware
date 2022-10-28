@@ -1,0 +1,46 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "jvtdegelo",
+      "name": "jvtdegelo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/64590453?v=4",
+      "profile": "https://github.com/jvtdegelo",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "GabZamba",
+      "name": "Gabriel Zambelli",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98465378?v=4",
+      "profile": "https://github.com/GabZamba",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "PedroDeSanti",
+      "name": "Pedro de Santi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62271285?v=4",
+      "profile": "https://github.com/PedroDeSanti",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "FlightOps",
+  "projectOwner": "PedroDeSanti"
+}

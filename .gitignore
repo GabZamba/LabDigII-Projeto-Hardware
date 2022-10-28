@@ -1,0 +1,13 @@
+# QUARTUS restored project files
+*.qarlog
+*.qpf
+*.qsf
+*.qws
+*.qdf
+*.rpt
+qar_info.json
+db/
+output_files/
+incremental_db/
+simulation/
+*model_dump.txt
