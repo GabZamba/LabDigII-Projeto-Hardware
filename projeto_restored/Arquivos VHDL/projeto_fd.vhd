@@ -24,7 +24,6 @@ entity projeto_fd is
         tx_saida_serial             : out std_logic;
         tx_pronto                   : out std_logic;
         timer_fim_2_seg             : out std_logic;
-        interrompido                : out std_logic;
 
         db_angulo_medido            : out std_logic_vector(11 downto 0);
         db_distancia_medida         : out std_logic_vector(15 downto 0)
@@ -152,12 +151,10 @@ architecture arch of projeto_fd is
         );
     end component registrador_n;
 
-    signal s_enable_registrador         : std_logic := '0';
-    signal s_contador_transmissao_saida : std_logic_vector (2 downto 0);
-    signal s_contador_posicao_saida     : std_logic_vector (2 downto 0);
-    signal s_tx_dado_ascii              : std_logic_vector (6 downto 0);
-    signal s_dados_ascii                : std_logic_vector (6 downto 0);
-    signal s_saida_reg                  : std_logic_vector (6 downto 0);
+    signal  s_contador_transmissao_saida, s_contador_posicao_saida 
+            : std_logic_vector (2 downto 0);
+    signal  s_tx_dado_ascii, s_dados_ascii            
+            : std_logic_vector (6 downto 0);
     signal s_distancia_medida           : std_logic_vector(15 downto 0);
     signal s_distancia_medida_ascii     : std_logic_vector(20 downto 0);
     signal s_rom_saida                  : std_logic_vector(23 downto 0);
@@ -282,28 +279,6 @@ begin
             db_estado           => open
         );
         
-    with s_dados_ascii select
-        s_enable_registrador  <=    '1' when "1101001", -- i 
-                                    '1' when "1110010", -- r
-                                    '0' when others;
-    
-    RegistradorModo: registrador_n
-        generic map (
-            N   => 7 
-        )
-        port map (
-            clock  => clock,
-            clear  => reset,
-            enable => s_enable_registrador,
-            D      => s_dados_ascii,
-            Q      => s_saida_reg
-        );
-    
-
-    with s_saida_reg select
-        interrompido  <=  '1' when "1101001", -- i 
-                          '0' when "1110010", -- r
-                          '0' when others;
 
     -- Converter digitos para ascii
     s_distancia_medida_ascii(6 downto 0)    <= "011" & s_distancia_medida(3 downto 0);   
