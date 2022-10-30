@@ -10,7 +10,7 @@ entity interface_hcsr04 is
         echo        : in std_logic;
 
         trigger     : out std_logic;
-        medida      : out std_logic_vector(11 downto 0); -- 3 digitos BCD
+        medida      : out std_logic_vector(15 downto 0); -- 4 digitos BCD
         pronto      : out std_logic;
         db_estado   : out std_logic_vector(3 downto 0) -- estado da UC
     );
@@ -47,12 +47,13 @@ architecture interface_hcsr04_arch of interface_hcsr04 is
             fim_medida      : out std_logic;
             digito0         : out std_logic_vector (3 downto 0);
             digito1         : out std_logic_vector (3 downto 0);
-            digito2         : out std_logic_vector (3 downto 0)
+            digito2         : out std_logic_vector (3 downto 0);
+            digito3         : out std_logic_vector (3 downto 0)
         );
     end component;
 
     signal s_zera, s_gera, s_fim_medida, s_registra: std_logic;
-    signal s_digito0, s_digito1, s_digito2, s_estado: std_logic_vector(3 downto 0);
+    signal s_digito0, s_digito1, s_digito2, s_digito3, s_estado: std_logic_vector(3 downto 0);
 
 begin
     UC: interface_hcsr04_uc 
@@ -85,11 +86,12 @@ begin
             fim_medida      => s_fim_medida,
             digito0         => s_digito0,
             digito1         => s_digito1,
-            digito2         => s_digito2
+            digito2         => s_digito2,
+            digito3         => s_digito3
 		);
 
     -- outras saídas
-    medida      <= s_digito2 & s_digito1 & s_digito0;
+    medida      <= s_digito3 & s_digito2 & s_digito1 & s_digito0;
     db_estado   <= s_estado;
 
     

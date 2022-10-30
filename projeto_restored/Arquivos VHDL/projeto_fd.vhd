@@ -27,7 +27,7 @@ entity projeto_fd is
         interrompido                : out std_logic;
 
         db_angulo_medido            : out std_logic_vector(11 downto 0);
-        db_distancia_medida         : out std_logic_vector(11 downto 0)
+        db_distancia_medida         : out std_logic_vector(15 downto 0)
     );
 end entity;
 
@@ -40,7 +40,7 @@ architecture arch of projeto_fd is
             echo        : in std_logic;
     
             trigger     : out std_logic;
-            medida      : out std_logic_vector(11 downto 0); 
+            medida      : out std_logic_vector(15 downto 0); 
             pronto      : out std_logic;
             db_estado   : out std_logic_vector(3 downto 0) 
         );
@@ -158,7 +158,7 @@ architecture arch of projeto_fd is
     signal s_tx_dado_ascii              : std_logic_vector (6 downto 0);
     signal s_dados_ascii                : std_logic_vector (6 downto 0);
     signal s_saida_reg                  : std_logic_vector (6 downto 0);
-    signal s_distancia_medida           : std_logic_vector(11 downto 0);
+    signal s_distancia_medida           : std_logic_vector(15 downto 0);
     signal s_distancia_medida_ascii     : std_logic_vector(20 downto 0);
     signal s_rom_saida                  : std_logic_vector(23 downto 0);
     

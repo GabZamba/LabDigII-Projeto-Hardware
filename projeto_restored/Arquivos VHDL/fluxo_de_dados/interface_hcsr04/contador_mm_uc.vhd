@@ -17,7 +17,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity contador_cm_uc is 
+entity contador_mm_uc is 
     port ( 
         clock       : in  std_logic;
         reset       : in  std_logic;
@@ -27,9 +27,9 @@ entity contador_cm_uc is
         conta       : out std_logic:= '0';
         pronto      : out std_logic:= '0'
     );
-end contador_cm_uc;
+end contador_mm_uc;
 
-architecture arch of contador_cm_uc is
+architecture arch of contador_mm_uc is
     type tipo_estado is (parado, contagem, final);
     signal Eatual, Eprox: tipo_estado;
 begin
