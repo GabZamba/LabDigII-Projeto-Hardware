@@ -3,21 +3,23 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity controle_servo is
-    port (
-        clock             : in  std_logic;
-        reset             : in  std_logic;
-        posicao_servo     : in  std_logic_vector (3 downto 0);
-        controle          : out std_logic
-    );
+  port (
+      clock             : in  std_logic;
+      reset             : in  std_logic;
+      posicao_servo     : in  std_logic_vector (9 downto 0);
+      controle          : out std_logic
+  );
 end controle_servo;
 
 architecture rtl of controle_servo is
-    constant CONTAGEM_MAXIMA_PWM  : integer := 1000000;  
-    signal contagem_pwm           : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
-    signal posicao_controle       : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
-    signal s_posicao              : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
+  constant CONTAGEM_MAXIMA_PWM  : integer := 1000000;
+  signal posicao_servo_int      : integer range 0 to 511;  
+  signal contagem_pwm           : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
+  signal posicao_controle       : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
+  signal s_posicao              : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
   
 begin
+  posicao_servo_int <= to_integer(unsigned(posicao_servo));
 
     process(clock,reset,s_posicao)
     begin
@@ -45,30 +47,10 @@ begin
 
     end process;
 
-    process(posicao_servo)
-    begin
-
-        case posicao_servo is
-            when "0000" =>  s_posicao <=  50000;
-            when "0001" =>  s_posicao <=  53333; 
-            when "0010" =>  s_posicao <=  56666;
-            when "0011" =>  s_posicao <=  60000;
-            when "0100" =>  s_posicao <=  63333;
-            when "0101" =>  s_posicao <=  66666; 
-            when "0110" =>  s_posicao <=  70000;
-            when "0111" =>  s_posicao <=  73333;
-            when "1000" =>  s_posicao <=  76666;
-            when "1001" =>  s_posicao <=  80000; 
-            when "1010" =>  s_posicao <=  83333;
-            when "1011" =>  s_posicao <=  86666;
-            when "1100" =>  s_posicao <=  90000;
-            when "1101" =>  s_posicao <=  93333; 
-            when "1110" =>  s_posicao <=  96666;
-            when "1111" =>  s_posicao <= 100000;
-            when others =>  s_posicao <=      0;  -- nulo   saida 0
-        end case;
-
-    end process;
+  process(posicao_servo)
+  begin
+    s_posicao <= 50000 + (50000*posicao_servo_int)/512;
+  end process;
   
   
 end rtl;

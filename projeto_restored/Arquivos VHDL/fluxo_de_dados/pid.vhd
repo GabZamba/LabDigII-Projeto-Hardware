@@ -28,8 +28,8 @@ architecture behavioral of pid is
     signal state, next_state 	: estados := Inicial;
 
 	-- Utilizando valores inteiros para as constantes, para se obter o valor real, deve-se dividir por 100 os seus respectivos valores
-    signal Kp 					: integer := 10; 
-    signal Kd 					: integer := 20;
+    signal Kp 					: integer := 50; 
+    signal Kd 					: integer := 0;
     signal Ki 					: integer := 0;
 
     signal saida 				: integer := 256; -- servo motor em posição de equílibrio para a bolinha	
