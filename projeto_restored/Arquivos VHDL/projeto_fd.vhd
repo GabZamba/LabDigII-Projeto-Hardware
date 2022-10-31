@@ -87,7 +87,7 @@ architecture arch of projeto_fd is
         port (
             clock             : in  std_logic;
             reset             : in  std_logic;
-            posicao_servo     : in  std_logic_vector (3 downto 0);
+            posicao_servo     : in  std_logic_vector (9 downto 0);
             controle          : out std_logic
         );
     end component;
@@ -156,7 +156,7 @@ architecture arch of projeto_fd is
     signal  s_contador_transmissao_saida 
         : std_logic_vector (2 downto 0);
     signal  s_contador_posicao_saida 
-        : std_logic_vector (3 downto 0);
+        : std_logic_vector (9 downto 0);
     signal  s_tx_dado_ascii, s_dados_ascii            
         : std_logic_vector (6 downto 0);
     signal  s_distancia_atual_x          
