@@ -35,7 +35,7 @@ architecture fsm_arch of projeto_uc is
 begin
 
     -- estado
-    process (reset, clock)
+    process (reset, clock, ligar)
     begin
         if reset = '1' or ligar = '0' then
             Eatual <= inicial;

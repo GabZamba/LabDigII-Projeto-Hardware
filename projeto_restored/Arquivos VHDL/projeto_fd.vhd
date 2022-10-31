@@ -45,6 +45,22 @@ architecture arch of projeto_fd is
         );
     end component;
 
+
+    component componente_de_distancias is
+        port (
+            clock   : in  std_logic;
+            reset   : in  std_logic;
+            echo    : in  std_logic;
+    
+            trigger             : out std_logic;
+            fim_medida          : out std_logic;
+            pronto              : out std_logic;
+            distancia_anterior  : out std_logic_vector(15 downto 0);
+            distancia_atual     : out std_logic_vector(15 downto 0);
+            db_distancia_medida : out std_logic_vector(15 downto 0)
+        );
+    end component;
+
     component contadorg_updown_m is
         generic (
             constant M: integer := 50
@@ -162,18 +178,20 @@ architecture arch of projeto_fd is
     
 begin
 
-    MedidorDistancia: interface_hcsr04
+
+    MedidorDistancia: componente_de_distancias 
         port map(
             clock           => clock,
             reset           => reset,
-            medir           => distancia_medir,
             echo            => distancia_echo,
-            trigger         => distancia_trigger,
-            medida          => s_distancia_medida,
-            pronto          => distancia_fim_medida,
-            db_estado       => open
-        );
 
+            trigger             => distancia_trigger,
+            fim_medida          => distancia_fim_medida,
+            pronto              => open,
+            distancia_anterior  => open,
+            distancia_atual     => s_distancia_medida,
+            db_distancia_medida => open
+        );
 
     ContadorUpDown: contadorg_updown_m
         generic map (

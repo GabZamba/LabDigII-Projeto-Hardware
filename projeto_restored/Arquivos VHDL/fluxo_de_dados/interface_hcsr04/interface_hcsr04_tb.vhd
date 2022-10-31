@@ -23,75 +23,75 @@ end entity;
 
 architecture tb of interface_hcsr04_tb is
   
-  -- Componente a ser testado (Device Under Test -- DUT)
-  component interface_hcsr04
-    port (
-        clock     : in  std_logic;
-        reset     : in  std_logic;
-        medir     : in  std_logic;
-        echo      : in  std_logic;
-        medida    : out std_logic_vector(15 downto 0);
-        trigger   : out std_logic;
-        pronto    : out std_logic;
-        db_estado : out std_logic_vector(3 downto 0)
-    );
-  end component;
-  
-  -- Declaração de sinais para conectar o componente a ser testado (DUT)
-  --   valores iniciais para fins de simulacao (GHDL ou ModelSim)
-  signal clock_in      : std_logic := '0';
-  signal reset_in      : std_logic := '0';
-  signal medir_in      : std_logic := '0';
-  signal echo_in       : std_logic := '0';
-  signal trigger_out   : std_logic := '0';
-  signal medida_out    : std_logic_vector (15 downto 0) := x"0000";
-  signal pronto_out    : std_logic := '0';
-  signal db_estado_out : std_logic_vector (3 downto 0)  := "0000";
+    -- Componente a ser testado (Device Under Test -- DUT)
+    component interface_hcsr04
+        port (
+            clock     : in  std_logic;
+            reset     : in  std_logic;
+            medir     : in  std_logic;
+            echo      : in  std_logic;
+            medida    : out std_logic_vector(15 downto 0);
+            trigger   : out std_logic;
+            pronto    : out std_logic;
+            db_estado : out std_logic_vector(3 downto 0)
+        );
+    end component;
+    
+    -- Declaração de sinais para conectar o componente a ser testado (DUT)
+    --   valores iniciais para fins de simulacao (GHDL ou ModelSim)
+    signal clock_in      : std_logic := '0';
+    signal reset_in      : std_logic := '0';
+    signal medir_in      : std_logic := '0';
+    signal echo_in       : std_logic := '0';
+    signal trigger_out   : std_logic := '0';
+    signal medida_out    : std_logic_vector (15 downto 0) := x"0000";
+    signal pronto_out    : std_logic := '0';
+    signal db_estado_out : std_logic_vector (3 downto 0)  := "0000";
 
-  -- Configurações do clock
-  constant clockPeriod   : time      := 20 ns; -- clock de 50MHz
-  signal keep_simulating : std_logic := '0';   -- delimita o tempo de geração do clock
-  
-  -- Array de casos de teste
-  type caso_teste_type is record
-      id    : natural; 
-      tempo : integer;     
-  end record;
+    -- Configurações do clock
+    constant clockPeriod   : time      := 20 ns; -- clock de 50MHz
+    signal keep_simulating : std_logic := '0';   -- delimita o tempo de geração do clock
+    
+    -- Array de casos de teste
+    type caso_teste_type is record
+        id    : natural; 
+        tempo : integer;     
+    end record;
 
-  type casos_teste_array is array (natural range <>) of caso_teste_type;
-  constant casos_teste : casos_teste_array :=
-      (
-        (1, 5882),  -- 5882us (100cm)
-        (2, 5899),  -- 5899us (100,29cm) truncar para 100cm
-        (3, 4353),  -- 4353us (74cm)
-        (4, 4399)   -- 4399us (74,79cm)  arredondar para 75cm
-        -- inserir aqui outros casos de teste (inserir "," na linha anterior)
-      );
+    type casos_teste_array is array (natural range <>) of caso_teste_type;
+    constant casos_teste : casos_teste_array :=
+        (
+            (1, 5882),  -- 5882us (100cm)
+            (2, 5899),  -- 5899us (100,29cm) truncar para 100cm
+            (3, 4353),  -- 4353us (74cm)
+            (4, 4399)   -- 4399us (74,79cm)  arredondar para 75cm
+            -- inserir aqui outros casos de teste (inserir "," na linha anterior)
+        );
 
-  signal larguraPulso: time := 1 ns;
-  signal caso  : integer := 0;
-  signal valorFinal  : integer := 0;
+    signal larguraPulso: time := 1 ns;
+    signal caso  : integer := 0;
+    signal valorFinal  : integer := 0;
 
 begin
-  -- Gerador de clock: executa enquanto 'keep_simulating = 1', com o período
-  -- especificado. Quando keep_simulating=0, clock é interrompido, bem como a 
-  -- simulação de eventos
-  clock_in <= (not clock_in) and keep_simulating after clockPeriod/2;
-  
-  -- Conecta DUT (Device Under Test)
-  dut: interface_hcsr04
-       port map( 
-           clock     => clock_in,
-           reset     => reset_in,
-           medir     => medir_in,
-           echo      => echo_in,
-           medida    => medida_out,
-           trigger   => trigger_out,
-           pronto    => pronto_out,
-           db_estado => db_estado_out
-       );
+    -- Gerador de clock: executa enquanto 'keep_simulating = 1', com o período
+    -- especificado. Quando keep_simulating=0, clock é interrompido, bem como a 
+    -- simulação de eventos
+    clock_in <= (not clock_in) and keep_simulating after clockPeriod/2;
+    
+    -- Conecta DUT (Device Under Test)
+    dut: interface_hcsr04
+        port map ( 
+            clock     => clock_in,
+            reset     => reset_in,
+            medir     => medir_in,
+            echo      => echo_in,
+            medida    => medida_out,
+            trigger   => trigger_out,
+            pronto    => pronto_out,
+            db_estado => db_estado_out
+        );
 
-  -- geracao dos sinais de entrada (estimulos)
+    -- geracao dos sinais de entrada (estimulos)
     stimulus: process is
     begin
     
