@@ -5,9 +5,18 @@
 *.qws
 *.qdf
 *.rpt
+*.vhd.bak
 qar_info.json
 db/
 output_files/
 incremental_db/
 simulation/
 *model_dump.txt
+
+# ModelSIM project files
+work/
+*.mdf
+*.wlf
+*.mpf
+*.mti
+*vstf

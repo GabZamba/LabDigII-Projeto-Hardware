@@ -1,10 +1,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity contador_cm is
+entity contador_mm is
     generic (
-        constant R : integer := 2941;
-        constant N : integer := 12
+        constant R : integer := 294;
+        constant N : integer := 9
     );
     port (
         clock   : in  std_logic;
@@ -13,13 +13,14 @@ entity contador_cm is
         digito0 : out std_logic_vector(3 downto 0);
         digito1 : out std_logic_vector(3 downto 0);
         digito2 : out std_logic_vector(3 downto 0);
+        digito3 : out std_logic_vector(3 downto 0);
         pronto  : out std_logic
     );
 end entity;
 
-architecture contador_cm_arch of contador_cm is
+architecture contador_mm_arch of contador_mm is
 
-    component contador_cm_uc is 
+    component contador_mm_uc is 
     port ( 
         clock       : in  std_logic;
         reset       : in  std_logic;
@@ -68,7 +69,7 @@ architecture contador_cm_arch of contador_cm is
         );
     end component;
 
-    component contador_bcd_3digitos is 
+    component contador_bcd_4digitos is 
         port ( 
             clock   : in  std_logic;
             zera    : in  std_logic;
@@ -77,15 +78,16 @@ architecture contador_cm_arch of contador_cm is
             digito0 : out std_logic_vector(3 downto 0);
             digito1 : out std_logic_vector(3 downto 0);
             digito2 : out std_logic_vector(3 downto 0);
+            digito3 : out std_logic_vector(3 downto 0);
             fim     : out std_logic
         );
     end component;
 
     signal s_reset, s_zera, s_conta, s_metade_superior, s_conta_BCD:    std_logic := '0';
-    signal s_contagem_tick:                                             std_logic_vector (11 downto 0);
+    signal s_contagem_tick:                                             std_logic_vector (N-1 downto 0);
 
 begin
-    UC: contador_cm_uc  
+    UC: contador_mm_uc  
     port map ( 
         clock       => clock,
         reset       => reset,
@@ -98,10 +100,11 @@ begin
 
     s_reset <= reset or s_zera;
 
+    -- emite um pulso de tick a cada R * 20 ns (294 * 20ns = 5,80 us, equivalente a 1mm)
     ContadorTick: contador_m 
         generic map (
-            M   => 2941, 
-            N   => 12
+            M   => R, 
+            N   => N
         ) 
         port map (
             clock   => clock, 
@@ -111,10 +114,11 @@ begin
             fim     => open
         );
 
+    -- emite o sinal s_metade_superior quando a contagem de tick ultrapassa 294/2 = 146
     AnalisadorDeArredondamento: analisa_m
         generic map (
-            M   => 2941,  
-            N   => 12
+            M   => R,  
+            N   => N
         )
         port map (
             valor           => s_contagem_tick,
@@ -124,6 +128,7 @@ begin
             metade_superior => s_metade_superior
         );
     
+    -- emite um pulso assim que a contagem o sinal s_metade_superior é ativado, incrementando o contadorBCD
     DetectorBordaMetade: edge_detector
         port map (
             clock       => clock,
@@ -131,7 +136,7 @@ begin
             output      => s_conta_BCD
         );
 
-    ContadorBCD3Digitos: contador_bcd_3digitos
+    ContadorBCD4Digitos: contador_bcd_4digitos
         port map (
             clock   => clock,
             zera    => s_reset,
@@ -140,6 +145,7 @@ begin
             digito0 => digito0,
             digito1 => digito1,
             digito2 => digito2,
+            digito3 => digito3,
             fim     => open
         );
   

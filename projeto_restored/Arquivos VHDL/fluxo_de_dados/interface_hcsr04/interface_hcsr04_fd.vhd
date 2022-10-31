@@ -14,7 +14,8 @@ entity interface_hcsr04_fd is
         fim_medida      : out std_logic;
         digito0         : out std_logic_vector (3 downto 0);
         digito1         : out std_logic_vector (3 downto 0);
-        digito2         : out std_logic_vector (3 downto 0)
+        digito2         : out std_logic_vector (3 downto 0);
+        digito3         : out std_logic_vector (3 downto 0)
     );
 end interface_hcsr04_fd;
 
@@ -47,7 +48,7 @@ architecture interface_hcsr04_fd_arch of interface_hcsr04_fd is
         );
     end component;
 
-    component contador_cm is
+    component contador_mm is
         generic (
             constant R : integer := 2941;
             constant N : integer := 12
@@ -59,13 +60,14 @@ architecture interface_hcsr04_fd_arch of interface_hcsr04_fd is
             digito0 : out std_logic_vector(3 downto 0);
             digito1 : out std_logic_vector(3 downto 0);
             digito2 : out std_logic_vector(3 downto 0);
+            digito3 : out std_logic_vector(3 downto 0);
             pronto  : out std_logic
         );
     end component;
     
     signal s_zera:                                      std_logic;
-    signal s_digito0, s_digito1, s_digito2:             std_logic_vector (3 downto 0);
-    signal s_entrada_registrador, s_saida_registrador:  std_logic_vector (11 downto 0);
+    signal s_digito0, s_digito1, s_digito2, s_digito3:  std_logic_vector (3 downto 0);
+    signal s_entrada_registrador, s_saida_registrador:  std_logic_vector (15 downto 0);
 
 begin
 
@@ -84,10 +86,12 @@ begin
             pronto  => open
         );
 
-    ContadorDistancia: contador_cm
+    ContadorDistancia: contador_mm
         generic map (
-            R   => 2941,
-            N   => 12
+            -- R   => 2941,    -- 2941 * 20ns = 58,82 us, equivalente a 1cm
+            R   => 294,     -- 294 * 20ns = 5,80 us, equivalente a 1mm 
+            -- N   => 12       -- 2^12 (4096) para caber 2941
+            N   => 9        -- 2^9 (512) para caber 294
         )
         port map (
             clock   => clock,
@@ -96,24 +100,26 @@ begin
             digito0 => s_digito0,
             digito1 => s_digito1,
             digito2 => s_digito2,
+            digito3 => s_digito3,
             pronto  => fim_medida
         );
 
-    s_entrada_registrador   <= s_digito2 & s_digito1 & s_digito0;
+    s_entrada_registrador   <= s_digito3 & s_digito2 & s_digito1 & s_digito0;
     RegistradorDados: registrador_n
         generic map (
-            N => 12
+            N => 16
         )
         port map (
             clock   => clock,
             clear   => s_zera,
             enable  => registra,
-            D       => s_entrada_registrador, -- (lembrar que 0110101 35 é recebido como 1010110 56)
+            D       => s_entrada_registrador,
             Q       => s_saida_registrador
         );
     digito0 <= s_saida_registrador( 3 downto 0);
     digito1 <= s_saida_registrador( 7 downto 4);
     digito2 <= s_saida_registrador(11 downto 8);
+    digito3 <= s_saida_registrador(15 downto 12);
     
     
 end architecture;
