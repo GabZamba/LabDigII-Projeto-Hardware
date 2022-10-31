@@ -13,7 +13,7 @@ end controle_servo;
 
 architecture rtl of controle_servo is
   constant CONTAGEM_MAXIMA_PWM  : integer := 1000000;
-  signal posicao_servo_int      : integer range 0 to 511;  
+  signal posicao_servo_int      : integer range 0 to 1023;  
   signal contagem_pwm           : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
   signal posicao_controle       : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
   signal s_posicao              : integer range 0 to CONTAGEM_MAXIMA_PWM-1;
@@ -49,7 +49,7 @@ begin
 
   process(posicao_servo)
   begin
-    s_posicao <= 50000 + (50000*posicao_servo_int)/512;
+    s_posicao <= 50000 + (50000*posicao_servo_int)/1024;
   end process;
   
   

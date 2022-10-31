@@ -32,7 +32,8 @@ architecture behavioral of pid is
     signal Kd 					: integer := 0;
     signal Ki 					: integer := 0;
 
-    signal saida 				: integer := 256; -- servo motor em posição de equílibrio para a bolinha	
+	signal equilibrio_valor		: integer := 0;
+    signal saida 				: integer := 512; -- servo motor em posição de equílibrio para a bolinha	
     signal erro					: integer := 0;		
     signal entrada_valor 		: integer := 0 ;
     signal equilibrio_valor 		: integer := 0 ;
@@ -78,15 +79,15 @@ begin
 		  
 		  	when SobrepoeSaida =>
 				next_state <=ConverteSaida;	
-				if saida >= 512 then
-				 	saida <= 511 ;
+				if saida >= 1024 then
+				 	saida <= 1023 ;
 				end if;     
 				if saida < 0 then 
 					saida <= 0;
 				end if;
 				
 		  	when ConverteSaida =>
-				saida_vetor <= std_logic_vector(to_unsigned(saida ,9));
+				saida_vetor <= std_logic_vector(to_unsigned(saida ,10));
 				next_state <=EscreveSaida;
 			
 		  	when EscreveSaida =>
