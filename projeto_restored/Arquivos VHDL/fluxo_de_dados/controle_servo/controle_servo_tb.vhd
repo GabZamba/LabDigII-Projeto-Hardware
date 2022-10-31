@@ -13,7 +13,7 @@ architecture tb of controle_servo_tb is
     port (
         clock             : in  std_logic;
         reset             : in  std_logic;
-        posicao_servo     : in  std_logic_vector (2 downto 0);
+        posicao_servo     : in  std_logic_vector (9 downto 0);
         controle          : out std_logic
     );
   end component;
@@ -22,7 +22,7 @@ architecture tb of controle_servo_tb is
   --   valores iniciais para fins de simulacao (GHDL ou ModelSim)
   signal clock_in     : std_logic := '0';
   signal reset_in     : std_logic := '0';
-  signal posicao_in   : std_logic_vector (2 downto 0) := "000";
+  signal posicao_in   : std_logic_vector (9 downto 0) := "000000000";
   signal controle_out : std_logic := '0';
 
 
@@ -60,22 +60,22 @@ begin
     wait for 2*clockPeriod;
 
     ---- casos de teste
-    posicao_in <= "000";
+    posicao_in <= "000000000";
     wait for 200 ms;
 
 
-    posicao_in <= "001";
+    posicao_in <= "001000000";
     wait for 200 ms;
 
 
-    posicao_in <= "010";
+    posicao_in <= "010000000";
     wait for 200 ms;
 
-    posicao_in <= "100";
+    posicao_in <= "100000000";
     wait for 200 ms;
 
     
-    posicao_in <= "110"; 
+    posicao_in <= "110000000"; 
     wait for 200 ms;
 
     ---- final dos casos de teste  da simulacao
