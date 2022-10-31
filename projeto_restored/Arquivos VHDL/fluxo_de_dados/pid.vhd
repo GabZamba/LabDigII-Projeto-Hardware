@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity pid is
     port (
         clock            : in  std_logic; -- Periodo de 10 ms
@@ -10,15 +11,19 @@ entity pid is
         saida_servo      : out std_logic_vector (9 downto 0) 
     );
 end pid;
+
+
 architecture behavioral of pid is
-    type estados is (Inicial,
-			CalculaNovoErro,
-			CalculaTermosPID,
-			DivideTermosPID,                              
-			SobrepoeSaida,
-			ConverteSaida,
-			EscreveSaida
-		);	                             
+    
+    type estados is (
+        Inicial,
+		CalculaNovoErro,
+		CalculaTermosPID,
+		DivideTermosPID,                              
+		SobrepoeSaida,
+		ConverteSaida,
+	    EscreveSaida
+	);	                             
     
     signal state, next_state 	: estados := Inicial;
 
@@ -30,10 +35,12 @@ architecture behavioral of pid is
     signal saida 				: integer := 256; -- servo motor em posição de equílibrio para a bolinha	
     signal erro					: integer := 0;		
     signal entrada_valor 		: integer := 0 ;
+    signal equilibrio_valor 		: integer := 0 ;
     signal p,i,d 				: integer := 0;
     signal saida_vetor 			: std_logic_vector (9 downto 0);
     
 begin
+    
 	entrada_valor 		<= to_integer(unsigned(entrada_sensor));
 	equilibrio_valor 	<= to_integer(unsigned(equilibrio));
 
@@ -44,6 +51,7 @@ begin
 	variable erro_acumulado	: integer := 0;
     
 	begin	 
+
         if clock'event and clock='1' then  
 			state <= next_state;
         end if;
@@ -85,5 +93,7 @@ begin
 				next_state <= Inicial;
 				saida_servo <= saida_vetor;
 	 	end case;
+
     end process;
+
 end behavioral;

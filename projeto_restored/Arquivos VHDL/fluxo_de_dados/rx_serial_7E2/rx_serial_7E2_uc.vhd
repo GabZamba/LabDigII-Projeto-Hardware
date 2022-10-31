@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+
 entity rx_serial_7E2_uc is 
     port (
         clock       : in  std_logic;
@@ -19,9 +20,15 @@ entity rx_serial_7E2_uc is
     );
 end entity;
 
+
 architecture rx_serial_7E2_uc_arch of rx_serial_7E2_uc is
 
-    type tipo_estado is (inicial, preparacao, espera, recebe, armazenamento, final, dado_presente);
+    type tipo_estado is (
+        inicial, preparacao, 
+        espera, recebe, armazenamento,
+        final, dado_presente
+    );
+
     signal Eatual: tipo_estado;  -- estado atual
     signal Eprox:  tipo_estado;  -- proximo estado
 
@@ -44,36 +51,27 @@ begin
 
         case Eatual is
 
-            when inicial =>
+            when inicial            =>
                 if dado_serial='0' then Eprox <= preparacao;
                 else                    Eprox <= inicial;
                 end if;
-
-            when preparacao =>   
-                Eprox <= espera;
+            when preparacao         =>  Eprox <= espera;
             
-            when espera =>
+            when espera             =>
                 if tick_meio='1' then   Eprox <= recebe;
                 elsif   fim='1' then    Eprox <= armazenamento;
                 else                    Eprox <= espera;
                 end if;
-
-            when recebe =>   
-                Eprox <= espera;
+            when recebe             =>  Eprox <= espera;
+            when armazenamento      =>  Eprox <= final;
             
-            when armazenamento =>
-                Eprox <= final;
-            
-            when final =>
-                Eprox <= dado_presente;
-            
-            when dado_presente 	=>
+            when final              =>  Eprox <= dado_presente;
+            when dado_presente      =>
                 if dado_serial='0' then Eprox <= preparacao;
                 else                    Eprox <= dado_presente;
                 end if;
             
-            when others =>
-                Eprox <= inicial;
+            when others             =>  Eprox <= inicial;
 
         end case;
 
@@ -86,29 +84,26 @@ begin
 
     with Eatual select
         desloca	    <= '1' when recebe, '0' when others;
-
     with Eatual select
         conta_rx 	<= '1' when recebe, '0' when others;
-
     with Eatual select
         registra    <= '1' when armazenamento, '0' when others;
 
     with Eatual select
         pronto 	    <= '1' when final, '0' when others;
-
     with Eatual select
         tem_dado    <= '1' when dado_presente, '0' when others;
 
     with Eatual select
-        db_estado   <=  "0001" when inicial,        -- 1
-                        "0010" when preparacao,     -- 2
-                        "0011" when espera,         -- 3
-                        "0100" when recebe,         -- 4
-                        "0101" when armazenamento,  -- 5
-                        "0110" when final,          -- 6
-                        "0111" when dado_presente,  -- 7
-                        "1111" when others;         -- F
-
+        db_estado   <=  
+            "0001" when inicial,        -- 1
+            "0010" when preparacao,     -- 2
+            "0011" when espera,         -- 3
+            "0100" when recebe,         -- 4
+            "0101" when armazenamento,  -- 5
+            "0110" when final,          -- 6
+            "0111" when dado_presente,  -- 7
+            "1111" when others;         -- F
 
 
 end architecture rx_serial_7E2_uc_arch;

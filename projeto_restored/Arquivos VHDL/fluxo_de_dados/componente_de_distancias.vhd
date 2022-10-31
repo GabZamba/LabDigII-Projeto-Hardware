@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 
+
 entity componente_de_distancias is
     port (
         clock   : in  std_logic;
@@ -18,7 +19,9 @@ entity componente_de_distancias is
     );
 end entity;
 
+
 architecture arch of componente_de_distancias is
+
     component interface_hcsr04 is
         port (
             clock       : in std_logic;
@@ -110,6 +113,7 @@ architecture arch of componente_de_distancias is
     
     
 begin
+    
     s_reset <= reset or s_zera;
     s_reset_sensor <= reset or s_fim_timer_25ms;
 

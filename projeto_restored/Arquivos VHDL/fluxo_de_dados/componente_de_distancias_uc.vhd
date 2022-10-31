@@ -23,19 +23,19 @@ entity componente_de_distancias_uc is
 end entity;
 
 architecture fsm_arch of componente_de_distancias_uc is
+
     type tipo_estado is (
         inicial,
-        gera_pulso_medida,
-        aguarda_fim_medida,
+        gera_pulso_medida, aguarda_fim_medida,
         registra_medida_realizada,
         verifica_fim_medidas,
-        incrementa_contador_medida,
-        espera_1ms,
-        registra_medida_anterior,
-        registra_medida_atual,
+        incrementa_contador_medida, espera_1ms,
+        registra_medida_anterior, registra_medida_atual,
         final
     );
+
     signal Eatual, Eprox: tipo_estado;
+
 begin
 
     -- estado
@@ -51,35 +51,35 @@ begin
     -- logica de proximo estado
     process (fim_medida, fim_contador_medida, fim_contador_1ms, fim_contador_25ms, Eatual) 
     begin
-      case Eatual is
-        when inicial                    =>      Eprox <= gera_pulso_medida;
-        when gera_pulso_medida          =>      Eprox <= aguarda_fim_medida;
+        case Eatual is
+            when inicial                    =>      Eprox <= gera_pulso_medida;
+            when gera_pulso_medida          =>      Eprox <= aguarda_fim_medida;
 
-        when aguarda_fim_medida =>  
-            if fim_medida='1' then              Eprox <= registra_medida_realizada;
-            elsif fim_contador_25ms='1' then    Eprox <= verifica_fim_medidas;
-            else                                Eprox <= aguarda_fim_medida;
-            end if;
+            when aguarda_fim_medida =>  
+                if fim_medida='1' then              Eprox <= registra_medida_realizada;
+                elsif fim_contador_25ms='1' then    Eprox <= verifica_fim_medidas;
+                else                                Eprox <= aguarda_fim_medida;
+                end if;
 
-        when registra_medida_realizada  =>      Eprox <= verifica_fim_medidas;
-        
-        
-        when verifica_fim_medidas =>  
-            if fim_contador_medida='1' then     Eprox <= registra_medida_anterior;
-            else                                Eprox <= incrementa_contador_medida;
-            end if;
-        
-        
-        when incrementa_contador_medida =>      Eprox <= espera_1ms;
+            when registra_medida_realizada  =>      Eprox <= verifica_fim_medidas;
+            
+            
+            when verifica_fim_medidas =>  
+                if fim_contador_medida='1' then     Eprox <= registra_medida_anterior;
+                else                                Eprox <= incrementa_contador_medida;
+                end if;
+            
+            
+            when incrementa_contador_medida =>      Eprox <= espera_1ms;
 
-        when espera_1ms                 =>      Eprox <= gera_pulso_medida;
+            when espera_1ms                 =>      Eprox <= gera_pulso_medida;
 
-        when registra_medida_anterior   =>      Eprox <= registra_medida_atual;
-        when registra_medida_atual      =>      Eprox <= final;
-        when final                      =>      Eprox <= inicial;
+            when registra_medida_anterior   =>      Eprox <= registra_medida_atual;
+            when registra_medida_atual      =>      Eprox <= final;
+            when final                      =>      Eprox <= inicial;
 
-        when others                     =>      Eprox <= inicial;
-      end case;
+            when others                     =>      Eprox <= inicial;
+        end case;
     end process;
 
   -- saidas de controle

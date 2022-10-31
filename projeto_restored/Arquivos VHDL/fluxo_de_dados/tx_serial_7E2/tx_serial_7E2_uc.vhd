@@ -19,7 +19,12 @@ end entity;
 
 architecture tx_serial_7E2_uc_arch of tx_serial_7E2_uc is
 
-    type tipo_estado is (inicial, preparacao, espera, transmissao, final);
+    type tipo_estado is (
+        inicial, preparacao, 
+        espera, transmissao, 
+        final
+    );
+
     signal Eatual, Eprox: tipo_estado;
 
 begin
@@ -40,30 +45,27 @@ begin
 
         case Eatual is
 
-            when inicial 	=>
+            when inicial 	    =>
                 if partida='1' then Eprox <= preparacao;
                 else                Eprox <= inicial;
                 end if;
-
             when preparacao =>   
                 Eprox <= espera;
             
-            when espera 	=>
-                if tick='1' then   Eprox <= transmissao;
-                elsif fim='0' then Eprox <= espera;
-                else               Eprox <= final;
+            when espera 	    =>
+                if tick='1' then    Eprox <= transmissao;
+                elsif fim='0' then  Eprox <= espera;
+                else                Eprox <= final;
                 end if;
             
-            when transmissao =>  
-                if fim='0' then Eprox <= espera;
-                else            Eprox <= final;
+            when transmissao    =>  
+                if fim='0' then     Eprox <= espera;
+                else                Eprox <= final;
                 end if;
             
-            when final =>
-                Eprox <= inicial;
+            when final          =>  Eprox <= inicial;
             
-            when others =>
-                Eprox <= inicial;
+            when others         =>  Eprox <= inicial;
 
         end case;
 
@@ -72,17 +74,16 @@ begin
     -- logica de saida (Moore)
     with Eatual select
         carrega	<= '1' when preparacao, '0' when others;
-
     with Eatual select
         zera	<= '1' when preparacao, '0' when others;
 
     with Eatual select
         desloca	<= '1' when transmissao, '0' when others;
-
     with Eatual select
         conta 	<= '1' when transmissao, '0' when others;
 
     with Eatual select
         pronto 	<= '1' when final, '0' when others;
 
+        
 end architecture tx_serial_7E2_uc_arch;

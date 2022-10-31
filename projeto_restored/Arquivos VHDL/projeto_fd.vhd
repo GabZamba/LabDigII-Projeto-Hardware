@@ -5,46 +5,32 @@ use ieee.math_real.all;
 
 entity projeto_fd is
     port (
-        clock                       : in  std_logic;
-        reset                       : in  std_logic;
-        contador_posicao_conta      : in  std_logic;
-        contador_posicao_zera       : in  std_logic;
-        contador_transmissao_conta  : in  std_logic;
-        contador_transmissao_zera   : in  std_logic;
-        distancia_medir             : in  std_logic;
-        distancia_echo              : in  std_logic;
-        tx_partida                  : in  std_logic;
-        timer_zera                  : in  std_logic;
-        entrada_serial              : in  std_logic;
+        clock                   : in  std_logic;
+        reset                   : in  std_logic;
+        conta_posicao_servo     : in  std_logic;
+        zera_posicao_servo      : in  std_logic;
+        conta_tx                : in  std_logic;
+        zera_contador_tx        : in  std_logic;
+        distancia_medir         : in  std_logic;    -- não mais usado
+        echo_bola_x             : in  std_logic;
+        tx_partida              : in  std_logic;
+        timer_zera              : in  std_logic;
+        entrada_serial          : in  std_logic;
 
-        contador_transmissao_fim    : out std_logic;
-        distancia_trigger           : out std_logic;
-        distancia_fim_medida        : out std_logic;
-        servo_pwm                   : out std_logic;
-        tx_saida_serial             : out std_logic;
-        tx_pronto                   : out std_logic;
-        timer_fim_2_seg             : out std_logic;
+        fim_contador_tx         : out std_logic;
+        trigger_bola_x          : out std_logic;
+        fim_medida_bola_x       : out std_logic;
+        servo_pwm               : out std_logic;
+        tx_saida_serial         : out std_logic;
+        tx_pronto               : out std_logic;
+        fim_timer_2s            : out std_logic;
 
-        db_angulo_medido            : out std_logic_vector(11 downto 0);
-        db_distancia_medida         : out std_logic_vector(15 downto 0)
+        db_angulo_medido        : out std_logic_vector(11 downto 0);
+        db_distancia_medida     : out std_logic_vector(15 downto 0)
     );
 end entity;
 
 architecture arch of projeto_fd is
-    component interface_hcsr04 is
-        port (
-            clock       : in std_logic;
-            reset       : in std_logic;
-            medir       : in std_logic;
-            echo        : in std_logic;
-    
-            trigger     : out std_logic;
-            medida      : out std_logic_vector(15 downto 0); 
-            pronto      : out std_logic;
-            db_estado   : out std_logic_vector(3 downto 0) 
-        );
-    end component;
-
 
     component componente_de_distancias is
         port (
@@ -168,31 +154,34 @@ architecture arch of projeto_fd is
     end component registrador_n;
 
     signal  s_contador_transmissao_saida 
-            : std_logic_vector (2 downto 0);
+        : std_logic_vector (2 downto 0);
     signal  s_contador_posicao_saida 
-            : std_logic_vector (3 downto 0);
+        : std_logic_vector (3 downto 0);
     signal  s_tx_dado_ascii, s_dados_ascii            
-            : std_logic_vector (6 downto 0);
-    signal s_distancia_medida           : std_logic_vector(15 downto 0);
-    signal s_distancia_medida_ascii     : std_logic_vector(20 downto 0);
-    signal s_rom_saida                  : std_logic_vector(23 downto 0);
+        : std_logic_vector (6 downto 0);
+    signal  s_distancia_atual_x          
+        : std_logic_vector(15 downto 0);
+    signal  s_distancia_atual_x_ascii     
+        : std_logic_vector(20 downto 0);
+    signal  s_rom_saida                  
+        : std_logic_vector(23 downto 0);
     
     
 begin
 
 
-    MedidorDistancia: componente_de_distancias 
+    MedidorDistanciaX: componente_de_distancias 
         port map(
             clock           => clock,
             reset           => reset,
-            echo            => distancia_echo,
+            echo            => echo_bola_x,
 
-            trigger             => distancia_trigger,
-            fim_medida          => distancia_fim_medida,
+            trigger             => trigger_bola_x,
+            fim_medida          => fim_medida_bola_x,
             pronto              => open,
             distancia_anterior  => open,
-            distancia_atual     => s_distancia_medida,
-            db_distancia_medida => open
+            distancia_atual     => s_distancia_atual_x,
+            db_distancia_medida => db_distancia_medida
         );
 
     ContadorUpDown: contadorg_updown_m
@@ -202,8 +191,8 @@ begin
         port map (
             clock   => clock,
             zera_as => reset,
-            zera_s  => contador_posicao_zera,
-            conta   => contador_posicao_conta,
+            zera_s  => zera_posicao_servo,
+            conta   => conta_posicao_servo,
             Q       => s_contador_posicao_saida,
             inicio  => open,
             fim     => open,
@@ -250,7 +239,7 @@ begin
             zera  => timer_zera,
             conta => '1',
             Q     => open,
-            fim   => timer_fim_2_seg,
+            fim   => fim_timer_2s,
             meio  => open
         );
 
@@ -261,10 +250,10 @@ begin
         )
         port map (
             clock => clock,
-            zera  => contador_transmissao_zera,
-            conta => contador_transmissao_conta,
+            zera  => zera_contador_tx,
+            conta => conta_tx,
             Q     => s_contador_transmissao_saida,
-            fim   => contador_transmissao_fim,
+            fim   => fim_contador_tx,
             meio  => open
         );
     
@@ -277,9 +266,9 @@ begin
             D1      => s_rom_saida(14 downto 8),
             D2      => s_rom_saida(6 downto 0),
             D3      => "0101100",
-            D4      => s_distancia_medida_ascii(20 downto 14),
-            D5      => s_distancia_medida_ascii(13 downto 7),
-            D6      => s_distancia_medida_ascii(6 downto 0),
+            D4      => s_distancia_atual_x_ascii(20 downto 14),
+            D5      => s_distancia_atual_x_ascii(13 downto 7),
+            D6      => s_distancia_atual_x_ascii(6 downto 0),
             D7      => "0100011",
             SEL     => s_contador_transmissao_saida,
             MUX_OUT => s_tx_dado_ascii
@@ -301,13 +290,12 @@ begin
         
 
     -- Converter digitos para ascii
-    s_distancia_medida_ascii(6 downto 0)    <= "011" & s_distancia_medida(3 downto 0);   
-    s_distancia_medida_ascii(13 downto 7)   <= "011" & s_distancia_medida(7 downto 4);
-    s_distancia_medida_ascii(20 downto 14)  <= "011" & s_distancia_medida(11 downto 8);
+    s_distancia_atual_x_ascii(6 downto 0)    <= "011" & s_distancia_atual_x(3 downto 0);   
+    s_distancia_atual_x_ascii(13 downto 7)   <= "011" & s_distancia_atual_x(7 downto 4);
+    s_distancia_atual_x_ascii(20 downto 14)  <= "011" & s_distancia_atual_x(11 downto 8);
 
     -- Depuracao
 
-    db_distancia_medida <= s_distancia_medida;
     db_angulo_medido    <= s_rom_saida(19 downto 16) & s_rom_saida(11 downto 8) & s_rom_saida(3 downto 0);
 
 end arch;

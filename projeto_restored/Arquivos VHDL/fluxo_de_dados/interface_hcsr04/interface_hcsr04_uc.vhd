@@ -34,9 +34,16 @@ entity interface_hcsr04_uc is
 end interface_hcsr04_uc;
 
 architecture fsm_arch of interface_hcsr04_uc is
-    type tipo_estado is (inicial, preparacao, envia_trigger, 
-                         espera_echo, medida, armazenamento, final);
+    
+    type tipo_estado is (
+        inicial, preparacao,
+        envia_trigger, espera_echo, 
+        medida, armazenamento, 
+        final
+    );
+
     signal Eatual, Eprox: tipo_estado;
+
 begin
 
     -- estado
@@ -52,42 +59,54 @@ begin
     -- logica de proximo estado
     process (medir, echo, fim_medida, Eatual) 
     begin
-      case Eatual is
-        when inicial =>         if medir='1' then Eprox <= preparacao;
-                                else              Eprox <= inicial;
-                                end if;
-        when preparacao =>      Eprox <= envia_trigger;
-        when envia_trigger =>   Eprox <= espera_echo;
-        when espera_echo =>     if echo='0' then Eprox <= espera_echo;
-                                else             Eprox <= medida;
-                                end if;
-        when medida =>          if fim_medida='1' then Eprox <= armazenamento;
-                                else                   Eprox <= medida;
-                                end if;
-        when armazenamento =>   Eprox <= final;
-        when final =>           Eprox <= inicial;
-        when others =>          Eprox <= inicial;
-      end case;
+
+        case Eatual is
+            when inicial =>         
+                if medir='1' then       Eprox <= preparacao;
+                else                    Eprox <= inicial;
+                end if;
+            when preparacao         =>  Eprox <= envia_trigger;
+
+            when envia_trigger      =>  Eprox <= espera_echo;
+
+            when espera_echo        =>     
+                if echo='0' then        Eprox <= espera_echo;
+                else                    Eprox <= medida;
+                end if;
+
+            when medida             =>          
+                if fim_medida='1' then  Eprox <= armazenamento;
+                else                    Eprox <= medida;
+                end if;
+
+            when armazenamento      =>  Eprox <= final;
+            when final              =>  Eprox <= inicial;
+
+            when others             =>  Eprox <= inicial;
+
+        end case;
+
     end process;
 
-  -- saidas de controle
-  with Eatual select 
-      zera          <= '1' when preparacao, '0' when others;
-  with Eatual select
-      gera          <= '1' when envia_trigger, '0' when others;
-  with Eatual select
-      registra      <= '1' when armazenamento, '0' when others;
-  with Eatual select
-      pronto        <= '1' when final, '0' when others;
+    -- saidas de controle
+    with Eatual select 
+        zera          <= '1' when preparacao, '0' when others;
+    with Eatual select
+        gera          <= '1' when envia_trigger, '0' when others;
+    with Eatual select
+        registra      <= '1' when armazenamento, '0' when others;
+    with Eatual select
+        pronto        <= '1' when final, '0' when others;
 
-  with Eatual select
-      db_estado <= "0000" when inicial,         -- 0
-                   "0001" when preparacao,      -- 1
-                   "0010" when envia_trigger,   -- 2
-                   "0011" when espera_echo,     -- 3
-                   "0100" when medida,          -- 4
-                   "0101" when armazenamento,   -- 5
-                   "1111" when final,           -- F
-                   "1110" when others;          -- E
+    with Eatual select
+        db_estado <= 
+            "0000" when inicial,         -- 0
+            "0001" when preparacao,      -- 1
+            "0010" when envia_trigger,   -- 2
+            "0011" when espera_echo,     -- 3
+            "0100" when medida,          -- 4
+            "0101" when armazenamento,   -- 5
+            "1111" when final,           -- F
+            "1110" when others;          -- E
 
 end architecture fsm_arch;

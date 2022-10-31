@@ -19,6 +19,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity rom_angulos_16x24 is
     port (
         endereco : in  std_logic_vector(3 downto 0);
@@ -26,8 +27,11 @@ entity rom_angulos_16x24 is
     ); 
 end entity;
 
+
 architecture rom_arch of rom_angulos_16x24 is
+
     type memoria_8x24 is array (integer range 0 to 15) of std_logic_vector(23 downto 0);
+
     constant tabela_angulos: memoria_8x24 := (
         x"303230", --   0 = 020  -- conteudo da ROM
         x"303239", --   1 = 029  -- angulos para o sonar
@@ -46,6 +50,7 @@ architecture rom_arch of rom_angulos_16x24 is
         x"313531", --  14 = 151
         x"313630"  --  15 = 160
     );
+
 begin
 
     saida <= tabela_angulos(to_integer(unsigned(endereco)));

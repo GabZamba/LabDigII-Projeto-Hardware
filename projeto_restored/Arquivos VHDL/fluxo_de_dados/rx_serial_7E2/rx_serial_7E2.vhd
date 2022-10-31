@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity rx_serial_7E2 is
     port (
         clock               : in std_logic;
@@ -17,24 +18,25 @@ entity rx_serial_7E2 is
     );
 end entity;
 
+
 architecture rx_serial_7E2_arch of rx_serial_7E2 is
 
     component rx_serial_7E2_uc is 
-    port (
-        clock       : in  std_logic;
-        reset       : in  std_logic;
-        dado_serial : in  std_logic;
-        tick_meio   : in  std_logic;
-        fim         : in  std_logic;
-        
-        zera        : out std_logic;
-        conta_rx    : out std_logic;
-        registra    : out std_logic;
-        desloca     : out std_logic;
-        pronto      : out std_logic;
-        tem_dado    : out std_logic;
-        db_estado   : out std_logic_vector(3 downto 0)
-    );
+        port (
+            clock       : in  std_logic;
+            reset       : in  std_logic;
+            dado_serial : in  std_logic;
+            tick_meio   : in  std_logic;
+            fim         : in  std_logic;
+            
+            zera        : out std_logic;
+            conta_rx    : out std_logic;
+            registra    : out std_logic;
+            desloca     : out std_logic;
+            pronto      : out std_logic;
+            tem_dado    : out std_logic;
+            db_estado   : out std_logic_vector(3 downto 0)
+        );
     end component;
 
     component rx_serial_7E2_fd is
@@ -78,8 +80,11 @@ architecture rx_serial_7E2_arch of rx_serial_7E2 is
     end component;
 
     
-    signal s_zera, s_conta_rx, s_registra, s_desloca, s_tick_meio, s_fim_rx, s_tem_dado: std_logic;
-    signal s_estado: std_logic_vector(3 downto 0);
+    signal  s_zera, s_conta_rx, s_registra, s_desloca, 
+            s_tick_meio, s_fim_rx, s_tem_dado
+        : std_logic;
+    signal  s_estado
+        : std_logic_vector(3 downto 0);
 
 begin
 
@@ -119,7 +124,7 @@ begin
             dados_ascii         => dados_ascii
 		);
 
-    -- gerador de tick
+    -- gerador de pulso de tick
     ContadorTick: contador_m
         generic map (
             M => 434, -- 115.200 bauds (50M/115.200)

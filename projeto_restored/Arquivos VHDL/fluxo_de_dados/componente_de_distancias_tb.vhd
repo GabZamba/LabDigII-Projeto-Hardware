@@ -50,20 +50,20 @@ architecture tb of componente_de_distancias_tb is
         (
             -- primeiras 4 medidas
             (1, 5882),  -- 5882us (1000mm)
-            (2, 5899),  -- 5899us (1002,9mm) arredondar para 1003mm
-            (3, 6000),  -- 6000us (1020,1mm) truncar para 1020mm
-            (4, 5800),  -- 5800us ( 986,1mm) truncar para 986mm
+            (1, 5899),  -- 5899us (1002,9mm) arredondar para 1003mm
+            (1, 6000),  -- 6000us (1020,1mm) truncar para 1020mm
+            (1, 5800),  -- 5800us ( 986,1mm) truncar para 986mm
             -- próximas 4 medidas
-            (5, 4353),  -- 4353us (740mm)
-            (6, 4399),   -- 4399us (747,9mm)  arredondar para 748mm
-            (7, 4412),   -- 4412us (750mm)
-            (8, 29410) -- 29410us (5m, acima de 4m, o limite máximo)
+            (2, 4353),  -- 4353us (740mm)
+            (2, 4399),  -- 4399us (747,9mm)  arredondar para 748mm
+            (2, 4412),  -- 4412us (750mm)
+            (2, 29410)  -- 29410us (5m, acima de 4m, o limite máximo)
             -- inserir aqui outros casos de teste (inserir "," na linha anterior)
         );
 
     signal larguraPulso: time := 1 ns;
     signal caso  : integer := 0;
-    signal valorFinal, valorAtual, valorAnterior  : integer := 0;
+    signal valorMedido, valorAtual, valorAnterior  : integer := 0;
 
 begin
     -- Gerador de clock: executa enquanto 'keep_simulating = 1', com o período
@@ -113,7 +113,7 @@ begin
                 integer'image(casos_teste(i).tempo) & "us" severity note;
             larguraPulso <= casos_teste(i).tempo * 1 us; -- caso de teste "i"
             caso <= casos_teste(i).id;
-            valorFinal <= 0;
+            valorMedido <= 0;
 
             -- 2) envia pulso medir
             wait until falling_edge(clock_in);
@@ -129,28 +129,30 @@ begin
             -- 5) espera final da medida
             wait until fim_medida_out = '1';
             wait for 5*clockPeriod;
-            valorFinal <= 
+
+            -- 6) converte cada valor BCD para inteiro
+            valorMedido <= 
                 to_integer(unsigned(db_medida(15 downto 12)))*1000 + 
                 to_integer(unsigned(db_medida(11 downto 8)))*100 + 
                 to_integer(unsigned(db_medida(7 downto 4)))*10 +
                 to_integer(unsigned(db_medida(3 downto 0)));
 
-                
             valorAtual <= 
                 to_integer(unsigned(medida_atual_out(15 downto 12)))*1000 + 
                 to_integer(unsigned(medida_atual_out(11 downto 8)))*100 + 
                 to_integer(unsigned(medida_atual_out(7 downto 4)))*10 +
                 to_integer(unsigned(medida_atual_out(3 downto 0)));
-                
+
             valorAnterior <= 
                 to_integer(unsigned(medida_anterior_out(15 downto 12)))*1000 + 
                 to_integer(unsigned(medida_anterior_out(11 downto 8)))*100 + 
                 to_integer(unsigned(medida_anterior_out(7 downto 4)))*10 +
                 to_integer(unsigned(medida_anterior_out(3 downto 0)));
+
             wait for 1000 us;
-            assert false report "Fim do caso " & integer'image(casos_teste(i).id) & ", valor medido: " & integer'image(valorFinal) severity note;
+            assert false report "Fim do caso " & integer'image(casos_teste(i).id) & ", valor medido: " & integer'image(valorMedido) severity note;
         
-            -- 6) espera entre casos de tese
+            -- 7) espera entre casos de tese
             wait for 100 us;
 
         end loop;

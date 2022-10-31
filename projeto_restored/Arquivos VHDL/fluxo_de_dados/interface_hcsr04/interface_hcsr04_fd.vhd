@@ -73,6 +73,7 @@ begin
 
     s_zera  <= reset or zera;
 
+    -- gera pulso trigger de 10us
     GeradorPulsoTrigger: gerador_pulso
         generic map (
             largura => 500  -- 500 * 20ns = 10us
@@ -86,6 +87,7 @@ begin
             pronto  => open
         );
 
+    -- converte o tempo do pulso de echo para mm
     ContadorDistancia: contador_mm
         generic map (
             -- R   => 2941,    -- 2941 * 20ns = 58,82 us, equivalente a 1cm
@@ -105,6 +107,8 @@ begin
         );
 
     s_entrada_registrador   <= s_digito3 & s_digito2 & s_digito1 & s_digito0;
+
+    -- registra os dados após a medição
     RegistradorDados: registrador_n
         generic map (
             N => 16
@@ -116,9 +120,10 @@ begin
             D       => s_entrada_registrador,
             Q       => s_saida_registrador
         );
-    digito0 <= s_saida_registrador( 3 downto 0);
-    digito1 <= s_saida_registrador( 7 downto 4);
-    digito2 <= s_saida_registrador(11 downto 8);
+
+    digito0 <= s_saida_registrador( 3 downto  0);
+    digito1 <= s_saida_registrador( 7 downto  4);
+    digito2 <= s_saida_registrador(11 downto  8);
     digito3 <= s_saida_registrador(15 downto 12);
     
     
