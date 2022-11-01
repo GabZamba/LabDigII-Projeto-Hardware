@@ -7,11 +7,11 @@ entity componente_de_distancias_uc is
         reset                   : in  std_logic;
         fim_medida              : in  std_logic;
         fim_contador_medida     : in  std_logic;
-        fim_contador_1ms        : in  std_logic;
-        fim_contador_25ms       : in  std_logic;
+        fim_timer_1ms        : in  std_logic;
+        fim_timer_distMax       : in  std_logic;
 
         zera                : out std_logic;
-        zera_contador_25ms  : out std_logic;
+        zera_timer_distMax  : out std_logic;
         pulso_medir         : out std_logic;
         registra_medida     : out std_logic;
         registra_atual      : out std_logic;
@@ -49,7 +49,7 @@ begin
     end process;
 
     -- logica de proximo estado
-    process (fim_medida, fim_contador_medida, fim_contador_1ms, fim_contador_25ms, Eatual) 
+    process (fim_medida, fim_contador_medida, fim_timer_1ms, fim_timer_distMax, Eatual) 
     begin
         case Eatual is
             when inicial                    =>      Eprox <= gera_pulso_medida;
@@ -57,7 +57,7 @@ begin
 
             when aguarda_fim_medida =>  
                 if fim_medida='1' then              Eprox <= registra_medida_realizada;
-                elsif fim_contador_25ms='1' then    Eprox <= verifica_fim_medidas;
+                elsif fim_timer_distMax='1' then    Eprox <= verifica_fim_medidas;
                 else                                Eprox <= aguarda_fim_medida;
                 end if;
 
@@ -90,7 +90,7 @@ begin
     with Eatual select 
         pulso_medir         <= '1' when gera_pulso_medida, '0' when others;
     with Eatual select
-        zera_contador_25ms  <= '1' when gera_pulso_medida, '0' when others;   
+        zera_timer_distMax  <= '1' when gera_pulso_medida, '0' when others;   
 
     with Eatual select
         registra_medida     <= '1' when registra_medida_realizada, '0' when others;  

@@ -42,11 +42,11 @@ architecture arch of componente_de_distancias is
             reset                   : in  std_logic;
             fim_medida              : in  std_logic;
             fim_contador_medida     : in  std_logic;
-            fim_contador_1ms        : in  std_logic;
-            fim_contador_25ms       : in  std_logic;
+            fim_timer_1ms           : in  std_logic;
+            fim_timer_distMax       : in  std_logic;
     
             zera                : out std_logic;
-            zera_contador_25ms  : out std_logic;
+            zera_timer_distMax  : out std_logic;
             pulso_medir         : out std_logic;
             registra_medida     : out std_logic;
             registra_atual      : out std_logic;
@@ -99,11 +99,11 @@ architecture arch of componente_de_distancias is
     end component comparador_de_distancias;
 
 
-    signal  s_reset, s_zera, s_reset_sensor, s_zera_timer_25ms, 
-            s_registra_medida, s_registra_anterior, s_registra_atual, 
+    signal  s_reset, s_zera, s_reset_sensor, s_zera_timer_distMax,      -- sinais de reset
+            s_registra_medida, s_registra_anterior, s_registra_atual,   -- sinais de registro
             s_registra_1, s_registra_2, s_registra_3, s_registra_4,
-            s_pulso_medir, s_conta_medida, s_conta_1ms, 
-            s_fim_medida, s_fim_timer_1ms, s_fim_timer_25ms, s_fim_contador_medida, s_fim   
+            s_pulso_medir, s_conta_medida, s_conta_1ms,                 -- sinais de 
+            s_fim_medida, s_fim_timer_1ms, s_fim_timer_distMax, s_fim_contador_medida, s_fim   -- sinais de fim
         : std_logic := '0';
     signal  s_contagem_atual 
         : std_logic_vector (1 downto 0);
@@ -115,7 +115,7 @@ architecture arch of componente_de_distancias is
 begin
     
     s_reset <= reset or s_zera;
-    s_reset_sensor <= reset or s_fim_timer_25ms;
+    s_reset_sensor <= reset or s_fim_timer_distMax;
 
     -- Sensor Ultrassônico de Distância
     SensorUltrassonico: interface_hcsr04
@@ -129,6 +129,7 @@ begin
             pronto          => s_fim_medida,        -- pulso que indica o término
             db_estado       => open
         );
+
     -- Unidade de Controle
     UC: componente_de_distancias_uc
         port map (
@@ -136,11 +137,11 @@ begin
             reset                   => reset,
             fim_medida              => s_fim_medida,
             fim_contador_medida     => s_fim_contador_medida,
-            fim_contador_1ms        => s_fim_timer_1ms,
-            fim_contador_25ms       => s_fim_timer_25ms,
+            fim_timer_1ms           => s_fim_timer_1ms,
+            fim_timer_distMax       => s_fim_timer_distMax,
 
             zera                => s_zera,
-            zera_contador_25ms  => s_zera_timer_25ms,
+            zera_timer_distMax  => s_zera_timer_distMax,
             pulso_medir         => s_pulso_medir,
             registra_medida     => s_registra_medida,
             registra_atual      => s_registra_atual,
@@ -166,17 +167,18 @@ begin
         );
 
     -- timer de limite para espera do sinal do sonar (4m ~> 23ms)
-    Timer25ms: contador_m 
+    TimerDistMax: contador_m 
         generic map (  
-            M => 1_250_000,  -- 1.250.000 * 20ns = 25ms
+            M => 147_050,    -- 147.050 * 20ns = 50cm * 58.82us/cm
+            -- M => 1_250_000,  -- 1.250.000 * 20ns = 25ms (pouco mais de 4m)
             N => 21 
         )
         port map (
             clock => clock,
-            zera  => s_zera_timer_25ms,
+            zera  => s_zera_timer_distMax,
             conta => '1',
             Q     => open,
-            fim   => s_fim_timer_25ms,
+            fim   => s_fim_timer_distMax,
             meio  => open
         );
 
