@@ -47,6 +47,17 @@ architecture arch of projeto_fd is
         );
     end component;
 
+    component receptor_cubo_virtual is
+        port (
+            clock       : in  std_logic;
+            reset       : in  std_logic;
+            dado_serial : in  std_logic;
+    
+            pronto                  : out std_logic;
+            distancia_cubo_virtual  : out std_logic_vector(11 downto 0)
+        );
+    end component;
+
     component contadorg_updown_m is
         generic (
             constant M: integer := 50
@@ -125,33 +136,6 @@ architecture arch of projeto_fd is
         );
     end component;
 
-    component rx_serial_7E2 is
-        port (
-            clock               : in std_logic;
-            reset               : in std_logic;
-            dado_serial         : in std_logic;
-    
-            dados_ascii         : out std_logic_vector(6 downto 0);
-            paridade_recebida   : out std_logic;
-            tem_dado            : out std_logic;
-            paridade_ok         : out std_logic;
-            pronto_rx           : out std_logic;
-            db_estado           : out std_logic_vector(6 downto 0)
-        );
-    end component;
-
-    component registrador_n is
-        generic (
-           constant N: integer := 8 
-        );
-        port (
-           clock  : in  std_logic;
-           clear  : in  std_logic;
-           enable : in  std_logic;
-           D      : in  std_logic_vector (N-1 downto 0);
-           Q      : out std_logic_vector (N-1 downto 0) 
-        );
-    end component registrador_n;
 
     signal  s_contador_transmissao_saida 
         : std_logic_vector (2 downto 0);
@@ -274,20 +258,17 @@ begin
             MUX_OUT => s_tx_dado_ascii
         );
 
-    ReceptorSerial: rx_serial_7E2
-        port map (
-            clock               => clock,
-            reset               => reset,
-            dado_serial         => entrada_serial,
     
-            dados_ascii         => s_dados_ascii,
-            paridade_recebida   => open,
-            tem_dado            => open,
-            paridade_ok         => open,
-            pronto_rx           => open,
-            db_estado           => open
+    ReceptorCuboVirtual: receptor_cubo_virtual 
+        port map(
+            clock           => clock,
+            reset           => reset,
+            dado_serial     => entrada_serial,
+
+            distancia_cubo_virtual  => open,
+            pronto                  => open
         );
-        
+
 
     -- Converter digitos para ascii
     s_distancia_atual_x_ascii(6 downto 0)    <= "011" & s_distancia_atual_x(3 downto 0);   
