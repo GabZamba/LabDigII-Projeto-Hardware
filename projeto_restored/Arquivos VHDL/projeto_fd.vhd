@@ -76,7 +76,7 @@ architecture arch of projeto_fd is
     
     component rom_angulos_16x24 is
         port (
-            endereco : in  std_logic_vector(3 downto 0);
+            endereco : in  std_logic_vector(9 downto 0);
             saida    : out std_logic_vector(23 downto 0)
         ); 
     end component;
@@ -170,7 +170,7 @@ begin
 
     ContadorUpDown: contadorg_updown_m
         generic map (
-            M => 16
+            M => 1024
         )
         port map (
             clock   => clock,

@@ -49,7 +49,7 @@ begin
         end if;
     end process;
 
-    process(posicao_servo)
+    process(posicao_servo, posicao_servo_int)
     begin
         s_posicao <= 50000 + (50000*posicao_servo_int)/1024;
     end process;

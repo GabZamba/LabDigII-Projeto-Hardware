@@ -22,7 +22,7 @@ use ieee.numeric_std.all;
 
 entity rom_angulos_16x24 is
     port (
-        endereco : in  std_logic_vector(3 downto 0);
+        endereco : in  std_logic_vector(9 downto 0);
         saida    : out std_logic_vector(23 downto 0)
     ); 
 end entity;
@@ -53,6 +53,6 @@ architecture rom_arch of rom_angulos_16x24 is
 
 begin
 
-    saida <= tabela_angulos(to_integer(unsigned(endereco)));
+    saida <= tabela_angulos(to_integer(unsigned(endereco(9 downto 6)))); -- TODO: VERIFICAR DEPOIS OS VALORES 
 
 end architecture rom_arch;
