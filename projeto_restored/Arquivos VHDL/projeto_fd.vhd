@@ -12,14 +12,20 @@ entity projeto_fd is
         conta_tx                : in  std_logic;
         zera_contador_tx        : in  std_logic;
         distancia_medir         : in  std_logic;    -- não mais usado
+        echo_cubo               : in  std_logic;
         echo_bola_x             : in  std_logic;
+        echo_bola_y             : in  std_logic;
         tx_partida              : in  std_logic;
         timer_zera              : in  std_logic;
         entrada_serial          : in  std_logic;
 
         fim_contador_tx         : out std_logic;
+        trigger_cubo            : out std_logic;
+        fim_medida_cubo         : out std_logic;
         trigger_bola_x          : out std_logic;
         fim_medida_bola_x       : out std_logic;
+        trigger_bola_y          : out std_logic;
+        fim_medida_bola_y       : out std_logic;
         servo_pwm               : out std_logic;
         tx_saida_serial         : out std_logic;
         tx_pronto               : out std_logic;
@@ -136,23 +142,40 @@ architecture arch of projeto_fd is
         );
     end component;
 
+    signal  s_fim_tx
+        : std_logic;
 
-    signal  s_contador_transmissao_saida 
+    signal  s_contagem_tx 
+        : std_logic_vector (0 downto 0);
+    signal  s_contagem_mux_tx 
         : std_logic_vector (2 downto 0);
-    signal  s_contador_posicao_saida 
+    signal  s_contador_posicao_saida, s_contador_posicao_x, s_contador_posicao_y
         : std_logic_vector (9 downto 0);
-    signal  s_tx_dado_ascii, s_dados_ascii            
+    signal  s_mux_distancia_x, s_mux_distancia_y, s_dados_ascii            
         : std_logic_vector (6 downto 0);
-    signal  s_distancia_atual_x          
+    signal  s_distancia_atual_x, s_distancia_atual_y , s_distancia_atual_cubo           
         : std_logic_vector(15 downto 0);
-    signal  s_distancia_atual_x_ascii     
+    signal  s_distancia_atual_x_ascii, s_distancia_atual_y_ascii     
         : std_logic_vector(20 downto 0);
-    signal  s_rom_saida                  
+    signal  s_rom_saida_x, s_rom_saida_y               
         : std_logic_vector(23 downto 0);
     
     
 begin
 
+    MedidorDistanciaCubo: componente_de_distancias 
+        port map(
+            clock           => clock,
+            reset           => reset,
+            echo            => echo_cubo,
+
+            trigger             => trigger_cubo,
+            fim_medida          => open,
+            pronto              => fim_medida_cubo,
+            distancia_anterior  => open,
+            distancia_atual     => s_distancia_atual_cubo,
+            db_distancia_medida => open
+        );
 
     MedidorDistanciaX: componente_de_distancias 
         port map(
@@ -168,7 +191,22 @@ begin
             db_distancia_medida => db_distancia_medida
         );
 
-    ContadorUpDown: contadorg_updown_m
+    MedidorDistanciaY: componente_de_distancias 
+        port map(
+            clock           => clock,
+            reset           => reset,
+            echo            => echo_bola_y,
+
+            trigger             => trigger_bola_y,
+            fim_medida          => fim_medida_bola_y,
+            pronto              => open,
+            distancia_anterior  => open,
+            distancia_atual     => s_distancia_atual_y,
+            db_distancia_medida => open
+        );
+
+    -- Servomotor Distancia X
+    ContadorUpDownX: contadorg_updown_m
         generic map (
             M => 1024
         )
@@ -177,40 +215,53 @@ begin
             zera_as => reset,
             zera_s  => zera_posicao_servo,
             conta   => conta_posicao_servo,
-            Q       => s_contador_posicao_saida,
+            Q       => s_contador_posicao_x,
             inicio  => open,
             fim     => open,
             meio    => open
        ); 
-
-
-    RomAngulos: rom_angulos_16x24
+    RomAngulosX: rom_angulos_16x24
         port map (
-            endereco => s_contador_posicao_saida,
-            saida    => s_rom_saida
+            endereco => s_contador_posicao_x,
+            saida    => s_rom_saida_x
         );
-    
-        
-    ControleServo: controle_servo 
+    ControleServoX: controle_servo 
         port map(
             clock             => clock,
             reset             => reset,
-            posicao_servo     => s_contador_posicao_saida,
+            posicao_servo     => s_contador_posicao_x,
             controle          => servo_pwm
         );
 
-    TransmissorSerial: tx_serial_7E2 
+    -- Servomotor Distancia Y
+    ContadorUpDownY: contadorg_updown_m
+        generic map (
+            M => 1024
+        )
         port map (
-            clock         => clock,
-            reset         => reset, 
-            partida       => tx_partida,
-            dados_ascii   => s_tx_dado_ascii,
-            saida_serial  => tx_saida_serial,
-            tick          => open,
-            contador_bits => open,
-            pronto        => tx_pronto
+            clock   => clock,
+            zera_as => reset,
+            zera_s  => zera_posicao_servo,
+            conta   => conta_posicao_servo,
+            Q       => s_contador_posicao_y,
+            inicio  => open,
+            fim     => open,
+            meio    => open
+       ); 
+    RomAngulosY: rom_angulos_16x24
+        port map (
+            endereco => s_contador_posicao_y,
+            saida    => s_rom_saida_y
         );
-
+    ControleServoY: controle_servo 
+        port map(
+            clock             => clock,
+            reset             => reset,
+            posicao_servo     => s_contador_posicao_y,
+            controle          => open
+        );
+    
+    -- timer de 2s entre cada medição
     Timer2Seg: contador_m 
         generic map (
             M => 100000000,  
@@ -227,38 +278,98 @@ begin
             meio  => open
         );
 
-    ContadorTransmissao: contador_m 
+    ContadorMuxTx: contador_m 
         generic map (
             M => 8,  
             N => 3 
         )
         port map (
             clock => clock,
+            zera  => conta_tx,
+            conta => s_fim_tx,
+            Q     => s_contagem_mux_tx,
+            fim   => tx_pronto,
+            meio  => open
+        );
+    
+    ContadorTxTotal: contador_m 
+        generic map (
+            M => 2,  
+            N => 1 
+        )
+        port map (
+            clock => clock,
             zera  => zera_contador_tx,
             conta => conta_tx,
-            Q     => s_contador_transmissao_saida,
+            Q     => s_contagem_tx,
             fim   => fim_contador_tx,
             meio  => open
         );
     
-    MuxTransmissorSerial: mux_8x1_n 
+
+
+    -- Converter digitos para ascii
+    s_distancia_atual_x_ascii( 6 downto  0) <= "011" & s_distancia_atual_x( 3 downto 0);   
+    s_distancia_atual_x_ascii(13 downto  7) <= "011" & s_distancia_atual_x( 7 downto 4);
+    s_distancia_atual_x_ascii(20 downto 14) <= "011" & s_distancia_atual_x(11 downto 8);
+
+    s_distancia_atual_y_ascii( 6 downto  0) <= "011" & s_distancia_atual_y( 3 downto 0);   
+    s_distancia_atual_y_ascii(13 downto  7) <= "011" & s_distancia_atual_y( 7 downto 4);
+    s_distancia_atual_y_ascii(20 downto 14) <= "011" & s_distancia_atual_y(11 downto 8);
+
+    MuxTxDistanciaX: mux_8x1_n 
         generic map(
             BITS    => 7 
         )
         port map( 
-            D0      => s_rom_saida(22 downto 16),
-            D1      => s_rom_saida(14 downto 8),
-            D2      => s_rom_saida(6 downto 0),
+            D0      => s_rom_saida_x(22 downto 16),
+            D1      => s_rom_saida_x(14 downto 8),
+            D2      => s_rom_saida_x(6 downto 0),
             D3      => "0101100",
             D4      => s_distancia_atual_x_ascii(20 downto 14),
             D5      => s_distancia_atual_x_ascii(13 downto 7),
             D6      => s_distancia_atual_x_ascii(6 downto 0),
             D7      => "0100011",
-            SEL     => s_contador_transmissao_saida,
-            MUX_OUT => s_tx_dado_ascii
+            SEL     => s_contagem_mux_tx,
+            MUX_OUT => s_mux_distancia_x
         );
 
+    MuxTxDistanciaY: mux_8x1_n 
+        generic map(
+            BITS    => 7 
+        )
+        port map( 
+            D0      => s_rom_saida_y(22 downto 16),
+            D1      => s_rom_saida_y(14 downto 8),
+            D2      => s_rom_saida_y(6 downto 0),
+            D3      => "0101100",
+            D4      => s_distancia_atual_y_ascii(20 downto 14),
+            D5      => s_distancia_atual_y_ascii(13 downto 7),
+            D6      => s_distancia_atual_y_ascii(6 downto 0),
+            D7      => "0100011",
+            SEL     => s_contagem_mux_tx,
+            MUX_OUT => s_mux_distancia_y
+        );
     
+    with s_contagem_tx select
+        s_dados_ascii <= 
+            s_mux_distancia_y when "1",
+            s_mux_distancia_x when others;
+    
+    
+    TransmissorSerial: tx_serial_7E2 
+        port map (
+            clock         => clock,
+            reset         => reset, 
+            partida       => tx_partida,
+            dados_ascii   => s_dados_ascii,
+            saida_serial  => tx_saida_serial,
+            tick          => open,
+            contador_bits => open,
+            pronto        => s_fim_tx
+        );
+
+
     ReceptorCuboVirtual: receptor_cubo_virtual 
         port map(
             clock           => clock,
@@ -270,13 +381,9 @@ begin
         );
 
 
-    -- Converter digitos para ascii
-    s_distancia_atual_x_ascii(6 downto 0)    <= "011" & s_distancia_atual_x(3 downto 0);   
-    s_distancia_atual_x_ascii(13 downto 7)   <= "011" & s_distancia_atual_x(7 downto 4);
-    s_distancia_atual_x_ascii(20 downto 14)  <= "011" & s_distancia_atual_x(11 downto 8);
 
     -- Depuracao
 
-    db_angulo_medido    <= s_rom_saida(19 downto 16) & s_rom_saida(11 downto 8) & s_rom_saida(3 downto 0);
+    db_angulo_medido    <= s_rom_saida_x(19 downto 16) & s_rom_saida_x(11 downto 8) & s_rom_saida_x(3 downto 0);
 
 end arch;
