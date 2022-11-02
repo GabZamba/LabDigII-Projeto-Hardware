@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity pid is
     port (
         clock            : in  std_logic; -- Periodo de 10 ms
@@ -10,6 +11,8 @@ entity pid is
         saida_servo      : out std_logic_vector (9 downto 0) 
     );
 end pid;
+
+
 architecture behavioral of pid is
     type estados is (
         Inicial,
@@ -36,6 +39,7 @@ architecture behavioral of pid is
     signal saida_vetor 			: std_logic_vector (9 downto 0);
     
 begin
+
 	entrada_valor 		<= to_integer(unsigned(entrada_sensor));
 	equilibrio_valor 	<= to_integer(unsigned(equilibrio));
 
@@ -46,10 +50,12 @@ begin
 	variable erro_acumulado	: integer := 0;
     
 	begin	 
+
         if clock'event and clock='1' then  
 			state <= next_state;
         end if;
         case state is
+
 			when Inicial =>
 				next_state 		<= CalculaNovoErro;
 				erro_antigo 	:= erro;
@@ -86,6 +92,8 @@ begin
 		  	when EscreveSaida =>
 				next_state <= Inicial;
 				saida_servo <= saida_vetor;
+
 	 	end case;
+
     end process;
 end behavioral;
