@@ -5,10 +5,10 @@ use ieee.numeric_std.all;
 
 entity pid is
     port (
-        clock            : in  std_logic; -- Periodo de 10 ms
-		equilibrio		 : in  std_logic_vector (9 downto 0);
-        entrada_sensor   : in  std_logic_vector (9 downto 0); 
-        saida_servo      : out std_logic_vector (9 downto 0) 
+        clock           : in  std_logic; -- Periodo de 10 ms
+		equilibrio		: in  std_logic_vector (9 downto 0);
+        entrada_sensor  : in  std_logic_vector (9 downto 0); 
+        posicao_servo   : out std_logic_vector (9 downto 0) 
     );
 end pid;
 
@@ -91,7 +91,7 @@ begin
 			
 		  	when EscreveSaida =>
 				next_state <= Inicial;
-				saida_servo <= saida_vetor;
+				posicao_servo	<= saida_vetor;
 
 	 	end case;
 

@@ -8,7 +8,7 @@ entity pid_alternativo is
         pulso_calcular   : in  std_logic; -- Periodo de 10 ms
 		equilibrio		 : in  std_logic_vector (9 downto 0);
         entrada_sensor   : in  std_logic_vector (9 downto 0); 
-        saida_servo      : out std_logic_vector (9 downto 0) 
+        posicao_servo      : out std_logic_vector (9 downto 0) 
     );
 end pid_alternativo;
 
@@ -47,7 +47,7 @@ begin
             saida_atual :=  saida_antiga + (p + i + d) / 100; -- Obtendo os valores reais para Kp Kd e Ki 
             if saida_atual >= 1024    then saida_atual := 1023; end if;     
             if saida_atual < 0        then saida_atual := 0;    end if;
-            saida_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
+            posicao_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
             
             erro_antigo 	<= erro_atual;
             saida_antiga 	<= saida_atual;

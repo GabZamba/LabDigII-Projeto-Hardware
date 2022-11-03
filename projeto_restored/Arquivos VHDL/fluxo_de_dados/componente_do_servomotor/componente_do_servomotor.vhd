@@ -51,17 +51,34 @@ architecture arch of componente_do_servomotor is
         );
     end component;
 
-    component pid is
+    component pid_alternativo is
         port (
-            clock            : in  std_logic; -- Periodo de 10 ms
+            pulso_calcular   : in  std_logic; -- Periodo de 10 ms
             equilibrio		 : in  std_logic_vector (9 downto 0);
             entrada_sensor   : in  std_logic_vector (9 downto 0); 
-            saida_servo      : out std_logic_vector (9 downto 0) 
+            posicao_servo      : out std_logic_vector (9 downto 0) 
         );
     end component;
 
+    
+    component contador_m is
+        generic (
+            constant M : integer := 50;  
+            constant N : integer := 6 
+        );
+        port (
+            clock : in  std_logic;
+            zera  : in  std_logic;
+            conta : in  std_logic;
+            Q     : out std_logic_vector (N-1 downto 0);
+            fim   : out std_logic;
+            meio  : out std_logic
+        );
+    end component;
 
-    signal  s_contador_posicao, s_equilibrio, s_entrada_sensor, s_saida_servo
+    signal  s_pulso_calcular
+        : std_logic;
+    signal  s_contador_posicao, s_equilibrio, s_entrada_sensor, s_posicao_servo
         : std_logic_vector (9 downto 0);
     signal  s_rom_saida               
         : std_logic_vector(23 downto 0);
@@ -69,12 +86,12 @@ architecture arch of componente_do_servomotor is
     
 begin
     
-    CalculoPID: pid 
+    CalculoPID: pid_alternativo 
         port map (
-            clock            => clock, -- Periodo de 10 ms
-            equilibrio		 => s_equilibrio,
-            entrada_sensor   => s_entrada_sensor, 
-            saida_servo      => s_saida_servo 
+            pulso_calcular  => s_pulso_calcular, -- Periodo de 10 ms
+            equilibrio		=> s_equilibrio,
+            entrada_sensor  => s_entrada_sensor, 
+            posicao_servo   => s_posicao_servo 
         );
 
     ContadorUpDown: contadorg_updown_m
@@ -96,7 +113,7 @@ begin
         port map(
             clock             => clock,
             reset             => reset,
-            posicao_servo     => s_contador_posicao,
+            posicao_servo     => s_posicao_servo,
             controle          => pwm_servo
         );
 
@@ -105,6 +122,24 @@ begin
         port map (
             endereco => s_contador_posicao,
             saida    => s_rom_saida
+        );
+
+    
+    -- timer de 10ms entre cada medição
+    Timer10ms: contador_m 
+        generic map (
+            M => 500_000,  -- 500.000 * 20ns = 10ms
+            N => 20 
+            -- M => 100,  
+            -- N => 7 
+        )
+        port map (
+            clock => clock,
+            zera  => '0',
+            conta => '1',
+            Q     => open,
+            fim   => s_pulso_calcular,
+            meio  => open
         );
     
     angulo_medido    <= s_rom_saida(19 downto 16) & s_rom_saida(11 downto 8) & s_rom_saida(3 downto 0);
