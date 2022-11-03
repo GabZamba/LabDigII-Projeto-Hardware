@@ -40,6 +40,7 @@ architecture arch of componente_de_distancias is
         port (
             clock                   : in  std_logic;
             reset                   : in  std_logic;
+            echo                    : in  std_logic;
             fim_medida              : in  std_logic;
             fim_contador_medida     : in  std_logic;
             fim_timer_1ms           : in  std_logic;
@@ -135,6 +136,7 @@ begin
         port map (
             clock                   => clock,
             reset                   => reset,
+            echo                    => echo,
             fim_medida              => s_fim_medida,
             fim_contador_medida     => s_fim_contador_medida,
             fim_timer_1ms           => s_fim_timer_1ms,
