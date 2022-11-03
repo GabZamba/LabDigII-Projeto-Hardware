@@ -10,37 +10,17 @@ entity componente_do_servomotor is
         reset                   : in  std_logic;
         conta_posicao_servo     : in  std_logic;
         zera_posicao_servo      : in  std_logic;
+        posicao_equilibrio      : in  std_logic_vector (9 downto 0);
+        distancia_medida        : in  std_logic_vector (9 downto 0);
 
         pwm_servo               : out std_logic;
-        angulo_medido           : out std_logic_vector(11 downto 0)
+        angulo_medido           : out std_logic_vector(23 downto 0)
     );
 end entity;
 
 
 architecture arch of componente_do_servomotor is
 
-    component contadorg_updown_m is
-        generic (
-            constant M: integer := 50
-        );
-        port (
-            clock  : in  std_logic;
-            zera_as: in  std_logic;
-            zera_s : in  std_logic;
-            conta  : in  std_logic;
-            Q      : out std_logic_vector (natural(ceil(log2(real(M))))-1 downto 0);
-            inicio : out std_logic;
-            fim    : out std_logic;
-            meio   : out std_logic 
-       );
-    end component;
-    
-    component rom_angulos_16x24 is
-        port (
-            endereco : in  std_logic_vector(9 downto 0);
-            saida    : out std_logic_vector(23 downto 0)
-        ); 
-    end component;
 
     component controle_servo is
         port (
@@ -53,14 +33,20 @@ architecture arch of componente_do_servomotor is
 
     component pid_alternativo is
         port (
-            pulso_calcular   : in  std_logic; -- Periodo de 10 ms
-            equilibrio		 : in  std_logic_vector (9 downto 0);
-            entrada_sensor   : in  std_logic_vector (9 downto 0); 
-            posicao_servo      : out std_logic_vector (9 downto 0) 
+            pulso_calcular      : in  std_logic; -- Periodo de 10 ms
+            equilibrio          : in  std_logic_vector (9 downto 0);
+            distancia_medida    : in  std_logic_vector (9 downto 0);
+            posicao_servo       : out std_logic_vector (9 downto 0)
         );
     end component;
 
-    
+    component rom_angulos_141x24 is
+        port (
+            endereco : in  std_logic_vector(9 downto 0);
+            saida    : out std_logic_vector(23 downto 0)
+        ); 
+    end component;
+
     component contador_m is
         generic (
             constant M : integer := 50;  
@@ -76,38 +62,22 @@ architecture arch of componente_do_servomotor is
         );
     end component;
 
+
     signal  s_pulso_calcular
         : std_logic;
-    signal  s_contador_posicao, s_equilibrio, s_entrada_sensor, s_posicao_servo
+    signal  s_posicao_servo
         : std_logic_vector (9 downto 0);
-    signal  s_rom_saida               
-        : std_logic_vector(23 downto 0);
-    
-    
+
+
 begin
-    
+
     CalculoPID: pid_alternativo 
         port map (
-            pulso_calcular  => s_pulso_calcular, -- Periodo de 10 ms
-            equilibrio		=> s_equilibrio,
-            entrada_sensor  => s_entrada_sensor, 
-            posicao_servo   => s_posicao_servo 
+            pulso_calcular      => s_pulso_calcular, -- Periodo de 10 ms
+            equilibrio          => posicao_equilibrio,
+            distancia_medida    => distancia_medida, 
+            posicao_servo       => s_posicao_servo 
         );
-
-    ContadorUpDown: contadorg_updown_m
-        generic map (
-            M => 1024
-        )
-        port map (
-            clock   => clock,
-            zera_as => reset,
-            zera_s  => zera_posicao_servo,
-            conta   => conta_posicao_servo,
-            Q       => s_contador_posicao,
-            inicio  => open,
-            fim     => open,
-            meio    => open
-       );
     
     ControleServo: controle_servo 
         port map(
@@ -117,15 +87,13 @@ begin
             controle          => pwm_servo
         );
 
-    
-    RomAngulos: rom_angulos_16x24
+    RomAngulos: rom_angulos_141x24
         port map (
-            endereco => s_contador_posicao,
-            saida    => s_rom_saida
+            endereco => s_posicao_servo,
+            saida    => angulo_medido
         );
 
-    
-    -- timer de 10ms entre cada medição
+    -- timer de 10ms entre cada medição do pid
     Timer10ms: contador_m 
         generic map (
             M => 500_000,  -- 500.000 * 20ns = 10ms
@@ -141,7 +109,5 @@ begin
             fim   => s_pulso_calcular,
             meio  => open
         );
-    
-    angulo_medido    <= s_rom_saida(19 downto 16) & s_rom_saida(11 downto 8) & s_rom_saida(3 downto 0);
 
 end arch;

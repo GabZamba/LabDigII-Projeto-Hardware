@@ -12,6 +12,7 @@ entity projeto is
         echo_bola_x         : in  std_logic;
         echo_bola_y         : in  std_logic;
         entrada_serial      : in  std_logic;
+        cubo_select         : in  std_logic;
         display_select      : in  std_logic_vector(1 downto 0);
 
         trigger_cubo        : out std_logic;
@@ -67,6 +68,7 @@ architecture arch of projeto is
             conta_tx                : in  std_logic;
             zera_contador_tx        : in  std_logic;
             distancia_medir         : in  std_logic;    -- não mais usado
+            cubo_select             : in  std_logic;
             echo_cubo               : in  std_logic;
             echo_bola_x             : in  std_logic;
             echo_bola_y             : in  std_logic;
@@ -166,6 +168,7 @@ begin
             conta_tx                => s_conta_tx,
             zera_contador_tx        => s_zera_contador_tx,
             distancia_medir         => s_distancia_medir,   -- não mais usado
+            cubo_select             => cubo_select,
             echo_cubo               => echo_cubo,
             echo_bola_x             => echo_bola_x,
             echo_bola_y             => echo_bola_y,

@@ -11,7 +11,7 @@ entity receptor_cubo_virtual is
         dado_serial : in  std_logic;
 
         pronto                  : out std_logic;
-        distancia_cubo_virtual  : out std_logic_vector(11 downto 0)
+        distancia_cubo_virtual  : out std_logic_vector(15 downto 0)
     );
 end entity;
 
@@ -23,7 +23,7 @@ architecture arch of receptor_cubo_virtual is
             clock               : in std_logic;
             reset               : in std_logic;
             dado_serial         : in std_logic;
-    
+
             dados_ascii         : out std_logic_vector(6 downto 0);
             paridade_recebida   : out std_logic;
             tem_dado            : out std_logic;
@@ -36,7 +36,7 @@ architecture arch of receptor_cubo_virtual is
     component contador_m is
         generic (
             constant M : integer := 50;  
-            constant N : integer := 6 
+            constant N : integer := 6
         );
         port (
             clock : in  std_logic;
@@ -50,7 +50,7 @@ architecture arch of receptor_cubo_virtual is
 
     component registrador_n is
         generic (
-           constant N: integer := 8 
+           constant N: integer := 8
         );
         port (
            clock  : in  std_logic;
@@ -61,19 +61,19 @@ architecture arch of receptor_cubo_virtual is
         );
     end component registrador_n;
 
-    signal  s_puldo_dado_recebido, s_fim_contador_rx, 
+    signal  s_puldo_dado_recebido, s_fim_contador_rx,
             s_registra_1, s_registra_2, s_registra_3,
             s_registra_distancia_final
         : std_logic;
-    signal  s_contagem_rx            
+    signal  s_contagem_rx
         : std_logic_vector (1 downto 0);
-    signal  s_valor_rx, s_dist1_cubo, s_dist2_cubo, s_dist3_cubo            
+    signal  s_valor_rx, s_dist1_cubo, s_dist2_cubo, s_dist3_cubo
         : std_logic_vector (3 downto 0);
-    signal  s_dado_ascii            
+    signal  s_dado_ascii
         : std_logic_vector (6 downto 0);
-    signal  s_distancia_recebida            
+    signal  s_distancia_recebida, s_distancia_cubo_virtual
         : std_logic_vector (11 downto 0);
-    
+
 begin
 
     ReceptorSerial: rx_serial_7E2
@@ -89,7 +89,7 @@ begin
             pronto_rx           => s_puldo_dado_recebido,
             db_estado           => open
         );
-    
+
     -- conta o número de caracteres recebidos serialmente
     ContadorRx: contador_m 
         generic map (
@@ -162,11 +162,12 @@ begin
             clear  => reset,
             enable => s_registra_distancia_final,
             D      => s_distancia_recebida,
-            Q      => distancia_cubo_virtual
+            Q      => s_distancia_cubo_virtual
         );
-    
+
     -- Saídas
+    distancia_cubo_virtual  <= "0000" & s_distancia_cubo_virtual;
     pronto <= s_registra_distancia_final;
-    
+
 
 end arch;

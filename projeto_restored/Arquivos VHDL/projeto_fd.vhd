@@ -15,6 +15,7 @@ entity projeto_fd is
         conta_tx                : in  std_logic;
         zera_contador_tx        : in  std_logic;
         distancia_medir         : in  std_logic;    -- não mais usado
+        cubo_select             : in  std_logic;
         echo_cubo               : in  std_logic;
         echo_bola_x             : in  std_logic;
         echo_bola_y             : in  std_logic;
@@ -66,9 +67,11 @@ architecture arch of projeto_fd is
             reset                   : in  std_logic;
             conta_posicao_servo     : in  std_logic;
             zera_posicao_servo      : in  std_logic;
+            posicao_equilibrio      : in  std_logic_vector (9 downto 0);
+            distancia_medida        : in  std_logic_vector (9 downto 0);
     
             pwm_servo               : out std_logic;
-            angulo_medido           : out std_logic_vector(11 downto 0)
+            angulo_medido           : out std_logic_vector(23 downto 0)
         );
     end component;
 
@@ -79,7 +82,7 @@ architecture arch of projeto_fd is
             dado_serial : in  std_logic;
     
             pronto                  : out std_logic;
-            distancia_cubo_virtual  : out std_logic_vector(11 downto 0)
+            distancia_cubo_virtual  : out std_logic_vector(15 downto 0)
         );
     end component;
 
@@ -147,7 +150,6 @@ architecture arch of projeto_fd is
 
     signal  s_fim_tx
         : std_logic;
-
     signal  s_contagem_tx 
         : std_logic_vector (0 downto 0);
     signal  s_contagem_mux_tx 
@@ -156,13 +158,12 @@ architecture arch of projeto_fd is
         : std_logic_vector (9 downto 0);
     signal  s_saida_mux_x, s_saida_mux_y, s_dados_ascii            
         : std_logic_vector (6 downto 0);
-    signal  s_angulo_servo_x, s_angulo_servo_y            
-        : std_logic_vector (11 downto 0);
-    signal  s_distancia_atual_x, s_distancia_atual_y, s_distancia_atual_cubo           
+    signal  s_distancia_atual_x, s_distancia_atual_y, s_distancia_cubo_real, s_distancia_cubo_virtual, s_distancia_cubo           
         : std_logic_vector(15 downto 0);
-    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_y,
-            s_ascii_angulo_servo_x, s_ascii_angulo_servo_y
+    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_y
         : std_logic_vector(20 downto 0);
+    signal  s_ascii_angulo_servo_x, s_ascii_angulo_servo_y
+        : std_logic_vector(23 downto 0);
     
     
 begin
@@ -177,7 +178,7 @@ begin
             fim_medida          => open,
             pronto              => fim_medida_cubo,
             distancia_anterior  => open,
-            distancia_atual     => s_distancia_atual_cubo,
+            distancia_atual     => s_distancia_cubo_real,
             db_distancia_medida => open
         );
 
@@ -216,9 +217,11 @@ begin
             reset                   => reset,
             conta_posicao_servo     => conta_posicao_servo_x,
             zera_posicao_servo      => zera_posicao_servo_x,
+            posicao_equilibrio      => s_distancia_cubo(9 downto 0),
+            distancia_medida        => s_distancia_atual_x(9 downto 0),
     
             pwm_servo               => pwm_servo_x,
-            angulo_medido           => s_angulo_servo_x
+            angulo_medido           => s_ascii_angulo_servo_x
         );
 
     -- Servomotor Distancia Y
@@ -228,9 +231,11 @@ begin
             reset                   => reset,
             conta_posicao_servo     => conta_posicao_servo_y,
             zera_posicao_servo      => zera_posicao_servo_y,
+            posicao_equilibrio      => s_distancia_cubo(9 downto 0),
+            distancia_medida        => s_distancia_atual_y(9 downto 0),
     
             pwm_servo               => pwm_servo_y,
-            angulo_medido           => s_angulo_servo_y
+            angulo_medido           => s_ascii_angulo_servo_y
         );
 
     -- timer de 2s entre cada medição
@@ -288,14 +293,6 @@ begin
     s_ascii_distancia_atual_y( 6 downto  0) <= "011" & s_distancia_atual_y( 3 downto 0);   
     s_ascii_distancia_atual_y(13 downto  7) <= "011" & s_distancia_atual_y( 7 downto 4);
     s_ascii_distancia_atual_y(20 downto 14) <= "011" & s_distancia_atual_y(11 downto 8);
-    
-    s_ascii_angulo_servo_x( 6 downto  0) <= "011" & s_angulo_servo_x( 3 downto 0);   
-    s_ascii_angulo_servo_x(13 downto  7) <= "011" & s_angulo_servo_x( 7 downto 4);
-    s_ascii_angulo_servo_x(20 downto 14) <= "011" & s_angulo_servo_x(11 downto 8);
-
-    s_ascii_angulo_servo_y( 6 downto  0) <= "011" & s_angulo_servo_y( 3 downto 0);   
-    s_ascii_angulo_servo_y(13 downto  7) <= "011" & s_angulo_servo_y( 7 downto 4);
-    s_ascii_angulo_servo_y(20 downto 14) <= "011" & s_angulo_servo_y(11 downto 8);
 
     -- Multiplexadores para Transmissão Serial
 
@@ -304,8 +301,8 @@ begin
             BITS    => 7 
         )
         port map( 
-            D0      => s_ascii_angulo_servo_x(20 downto 14),
-            D1      => s_ascii_angulo_servo_x(13 downto  7),
+            D0      => s_ascii_angulo_servo_x(22 downto 16),
+            D1      => s_ascii_angulo_servo_x(14 downto  8),
             D2      => s_ascii_angulo_servo_x( 6 downto  0),
             D3      => "0101100",
             D4      => s_ascii_distancia_atual_x(20 downto 14),
@@ -321,8 +318,8 @@ begin
             BITS    => 7 
         )
         port map( 
-            D0      => s_ascii_angulo_servo_y(20 downto 14),
-            D1      => s_ascii_angulo_servo_y(13 downto  7),
+            D0      => s_ascii_angulo_servo_y(22 downto 16),
+            D1      => s_ascii_angulo_servo_y(14 downto  8),
             D2      => s_ascii_angulo_servo_y( 6 downto  0),
             D3      => "0101100",
             D4      => s_ascii_distancia_atual_y(20 downto 14),
@@ -358,12 +355,17 @@ begin
             reset           => reset,
             dado_serial     => entrada_serial,
 
-            distancia_cubo_virtual  => open,
+            distancia_cubo_virtual  => s_distancia_cubo_virtual,
             pronto                  => open
         );
 
+    with cubo_select select
+        s_distancia_cubo <=
+            s_distancia_cubo_virtual when '1',
+            s_distancia_cubo_real when '0';
+
     -- Depuração
-    db_angulo_medido_x  <= s_angulo_servo_x;
-    db_angulo_medido_y  <= s_angulo_servo_y;
+    db_angulo_medido_x  <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
+    db_angulo_medido_y  <= s_ascii_angulo_servo_y(19 downto 16) & s_ascii_angulo_servo_y(11 downto 8) & s_ascii_angulo_servo_y(3 downto 0);
 
 end arch;
