@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+
 entity comparador_de_distancias is
     generic (
         constant DistMax_mm : integer := 500  
@@ -15,10 +16,13 @@ entity comparador_de_distancias is
     );
 end entity comparador_de_distancias;
 
+
 architecture comportamental of comparador_de_distancias is
 
-    signal v1, v2, v3, v4: integer range 0 to DistMax_mm;
-    signal d1, d2, d3, d4, result: integer range 0 to 9999; -- para os 16 digitos da distancia (2^16)
+    signal v1, v2, v3, v4
+        : integer range 0 to DistMax_mm;
+    signal d1, d2, d3, d4, result
+        : integer range 0 to 9999; -- para os 16 digitos da distancia (2^16)
 
 begin
 
@@ -70,7 +74,7 @@ begin
 
     end process;
 
-
+    -- converte o resultado (inteiro) para BCD 4 Digitos
     resultado <=    std_logic_vector(to_unsigned( result / 1000, 4)) &
                     std_logic_vector(to_unsigned( (result mod 1000) / 100, 4)) &
                     std_logic_vector(to_unsigned( (result mod 100) / 10, 4)) &

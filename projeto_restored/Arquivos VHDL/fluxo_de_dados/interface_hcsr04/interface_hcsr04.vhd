@@ -52,10 +52,15 @@ architecture interface_hcsr04_arch of interface_hcsr04 is
         );
     end component;
 
-    signal s_zera, s_gera, s_fim_medida, s_registra: std_logic;
-    signal s_digito0, s_digito1, s_digito2, s_digito3, s_estado: std_logic_vector(3 downto 0);
+
+    signal  s_zera, s_gera, s_fim_medida, s_registra
+        : std_logic;
+    signal  s_digito0, s_digito1, s_digito2, s_digito3, s_estado
+        : std_logic_vector(3 downto 0);
+
 
 begin
+
     UC: interface_hcsr04_uc 
 		port map (
             -- entradas
@@ -93,7 +98,6 @@ begin
     -- outras saídas
     medida      <= s_digito3 & s_digito2 & s_digito1 & s_digito0;
     db_estado   <= s_estado;
-
     
 end architecture;
 

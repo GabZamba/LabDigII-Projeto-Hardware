@@ -74,14 +74,20 @@ architecture rx_serial_7E2_fd_arch of rx_serial_7E2_fd is
         );
     end component;
     
-    signal s_paridade_ok, s_limpar: std_logic;
-    signal s_saida_registrador: std_logic_vector (7 downto 0);
-    signal s_saida_deslocador: std_logic_vector (10 downto 0);
+
+    signal s_paridade_ok, s_limpar
+        : std_logic;
+    signal s_saida_registrador
+        : std_logic_vector (7 downto 0);
+    signal s_saida_deslocador
+        : std_logic_vector (10 downto 0);
+
 
 begin
 
     s_limpar    <= reset or zera;
 
+    -- deslocador que insere cada bit transmitido e desloca para esquerda
     Deslocador: deslocador_n 
         generic map (
             N => 11
@@ -96,6 +102,7 @@ begin
             saida          => s_saida_deslocador -- 0 start bit, 1 a 7 dados, 8 paridade, 9 e 10 stop bit
         );
 
+    -- conta o número de bits recebidos a partir do startbit
     ContadorDados: contador_m 
         generic map (
             M => 12,    -- 11 bits ao todo (1 start, 7 dados, 1 paridade e 2 stop), mas contagem começa em 1
@@ -109,6 +116,7 @@ begin
             fim   => fim_rx
         );
 
+    -- registra os bits de dados e de paridade do deslocador, após término da recepção
     RegistradorDados: registrador_n
         generic map (
             N => 8
@@ -121,6 +129,7 @@ begin
             Q       => s_saida_registrador
         );
     
+    -- verifica se a paridade dos bits recebidos está correta
     TestadorParidade: testador_paridade
         port map (
             dado        => s_saida_registrador(6 downto 0),
@@ -133,8 +142,6 @@ begin
     dados_ascii         <= s_saida_registrador(6 downto 0);
     paridade_recebida   <= s_saida_registrador(7);
     paridade_ok         <= tem_dado and s_paridade_ok; -- só poderá ser 1 se tiver dado
-
-    
     
 end architecture;
 

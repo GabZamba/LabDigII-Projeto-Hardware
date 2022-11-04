@@ -32,11 +32,14 @@ entity testador_paridade is
     );
 end entity testador_paridade;
 
+
 architecture rtl of testador_paridade is
 begin
 
     process (dado, paridade)
+
         variable p : std_logic;
+
     begin
         -- verificacao da paridade
         p := dado(0);
@@ -47,6 +50,8 @@ begin
         -- saidas
         par_ok   <= not p;
         impar_ok <= p;  
+
     end process;
 
+    
 end architecture rtl;

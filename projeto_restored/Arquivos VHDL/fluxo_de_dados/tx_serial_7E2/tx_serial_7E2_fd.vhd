@@ -19,39 +19,42 @@ entity tx_serial_7E2_fd is
     );
 end entity;
 
+
 architecture tx_serial_7E2_fd_arch of tx_serial_7E2_fd is
      
     component deslocador_n
-    generic (
-        constant N : integer
-    );
-    port (
-        clock          : in  std_logic;
-        reset          : in  std_logic;
-        carrega        : in  std_logic; 
-        desloca        : in  std_logic; 
-        entrada_serial : in  std_logic; 
-        dados          : in  std_logic_vector (N-1 downto 0);
-        saida          : out std_logic_vector (N-1 downto 0)
-    );
+        generic (
+            constant N : integer
+        );
+        port (
+            clock          : in  std_logic;
+            reset          : in  std_logic;
+            carrega        : in  std_logic; 
+            desloca        : in  std_logic; 
+            entrada_serial : in  std_logic; 
+            dados          : in  std_logic_vector (N-1 downto 0);
+            saida          : out std_logic_vector (N-1 downto 0)
+        );
     end component;
 
     component contador_m
-    generic (
-        constant M : integer;
-        constant N : integer
-    );
-    port (
-        clock : in  std_logic;
-        zera  : in  std_logic;
-        conta : in  std_logic;
-        Q     : out std_logic_vector (N-1 downto 0);
-        fim   : out std_logic
-    );
+        generic (
+            constant M : integer;
+            constant N : integer
+        );
+        port (
+            clock : in  std_logic;
+            zera  : in  std_logic;
+            conta : in  std_logic;
+            Q     : out std_logic_vector (N-1 downto 0);
+            fim   : out std_logic
+        );
     end component;
     
-	signal s_paridade: std_logic;
-    signal s_dados, s_saida: std_logic_vector (11 downto 0);
+	signal s_paridade
+        : std_logic;
+    signal s_dados, s_saida
+        : std_logic_vector (11 downto 0);
 
 begin
 
@@ -67,7 +70,8 @@ begin
     s_dados(9)   			<= s_paridade;	-- bit paridade par
     s_dados(11 downto 10)	<= "11";        -- stop bits
 
-    U1: deslocador_n 
+    -- desloca para a direita a cada dado que transfere, inserindo '1'
+    Deslocador: deslocador_n 
         generic map (
             N => 12
         )  
@@ -81,7 +85,8 @@ begin
             saida          => s_saida
         );
 
-    U2: contador_m 
+    -- incrementa a cada dado que transfere
+    Contador: contador_m 
         generic map (
             M => 13, 
             N => 4
