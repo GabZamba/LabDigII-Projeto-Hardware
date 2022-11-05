@@ -86,22 +86,6 @@ architecture arch of projeto_fd is
         );
     end component;
 
-    component contadorg_updown_m is
-        generic (
-            constant M: integer := 50
-        );
-        port (
-            clock  : in  std_logic;
-            zera_as: in  std_logic;
-            zera_s : in  std_logic;
-            conta  : in  std_logic;
-            Q      : out std_logic_vector (natural(ceil(log2(real(M))))-1 downto 0);
-            inicio : out std_logic;
-            fim    : out std_logic;
-            meio   : out std_logic 
-       );
-    end component;
-
     component tx_serial_7E2 is
         port (
             clock         : in  std_logic;
@@ -147,26 +131,36 @@ architecture arch of projeto_fd is
             MUX_OUT : out std_logic_vector (BITS-1 downto 0)
         );
     end component;
+    
+    component componente_de_transmissao is
+        port (
+            clock                   : in  std_logic;
+            reset                   : in  std_logic;
+            partida                 : in  std_logic;
+            distancia_atual_cubo    : in  std_logic_vector(11 downto 0);
+            distancia_atual_x       : in  std_logic_vector(11 downto 0);
+            distancia_atual_y       : in  std_logic_vector(11 downto 0);
+            ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
+            ascii_angulo_servo_y    : in  std_logic_vector(23 downto 0);
 
-    signal  s_fim_tx
+            saida_serial            : out std_logic;
+            pronto                  : out std_logic
+
+        );
+    end component;
+
+
+    signal  s_fim_timer_2s
         : std_logic;
-    signal  s_contagem_tx 
-        : std_logic_vector (0 downto 0);
-    signal  s_contagem_mux_tx 
-        : std_logic_vector (2 downto 0);
-    signal  s_contador_posicao_saida, s_contador_posicao_x, s_contador_posicao_y
-        : std_logic_vector (9 downto 0);
-    signal  s_saida_mux_x, s_saida_mux_y, s_dados_ascii            
-        : std_logic_vector (6 downto 0);
     signal  s_distancia_atual_x, s_distancia_atual_y, s_distancia_cubo_real, s_distancia_cubo_virtual, s_distancia_cubo           
         : std_logic_vector(15 downto 0);
-    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_y
-        : std_logic_vector(20 downto 0);
     signal  s_ascii_angulo_servo_x, s_ascii_angulo_servo_y
         : std_logic_vector(23 downto 0);
     
     
 begin
+
+    -- Componentes para os sensores ultrassônicos de distância
 
     MedidorDistanciaCubo: componente_de_distancias 
         port map(
@@ -210,7 +204,8 @@ begin
             db_distancia_medida => db_distancia_medida_y
         );
 
-    -- Servomotor Distancia X
+    -- Componentes para os dois servomotores (x e y)
+
     ServomotorX: componente_do_servomotor 
         port map (
             clock                   => clock,
@@ -224,7 +219,6 @@ begin
             angulo_medido           => s_ascii_angulo_servo_x
         );
 
-    -- Servomotor Distancia Y
     ServomotorY: componente_do_servomotor 
         port map (
             clock                   => clock,
@@ -251,103 +245,25 @@ begin
             zera  => timer_zera,
             conta => '1',
             Q     => open,
-            fim   => fim_timer_2s,
+            fim   => s_fim_timer_2s,
             meio  => open
         );
 
-    ContadorMuxTx: contador_m 
-        generic map (
-            M => 8,  
-            N => 3 
-        )
+    -- Componente que realiza a transmissão serial dos dados
+    ComponenteDeTransmissao: componente_de_transmissao
         port map (
-            clock => clock,
-            zera  => conta_tx,
-            conta => s_fim_tx,
-            Q     => s_contagem_mux_tx,
-            fim   => tx_pronto,
-            meio  => open
+            clock                   => clock,
+            reset                   => reset,
+            partida                 => s_fim_timer_2s,
+            distancia_atual_cubo    => s_distancia_cubo(11 downto 0),
+            distancia_atual_x       => s_distancia_atual_x(11 downto 0),
+            distancia_atual_y       => s_distancia_atual_y(11 downto 0),
+            ascii_angulo_servo_x    => s_ascii_angulo_servo_x,
+            ascii_angulo_servo_y    => s_ascii_angulo_servo_y,
+
+            saida_serial            => saida_serial,
+            pronto                  => open
         );
-    
-    ContadorTxTotal: contador_m 
-        generic map (
-            M => 2,  
-            N => 1 
-        )
-        port map (
-            clock => clock,
-            zera  => zera_contador_tx,
-            conta => conta_tx,
-            Q     => s_contagem_tx,
-            fim   => fim_contador_tx,
-            meio  => open
-        );
-    
-
-
-    -- Converter digitos para ascii
-    s_ascii_distancia_atual_x( 6 downto  0) <= "011" & s_distancia_atual_x( 3 downto 0);   
-    s_ascii_distancia_atual_x(13 downto  7) <= "011" & s_distancia_atual_x( 7 downto 4);
-    s_ascii_distancia_atual_x(20 downto 14) <= "011" & s_distancia_atual_x(11 downto 8);
-
-    s_ascii_distancia_atual_y( 6 downto  0) <= "011" & s_distancia_atual_y( 3 downto 0);   
-    s_ascii_distancia_atual_y(13 downto  7) <= "011" & s_distancia_atual_y( 7 downto 4);
-    s_ascii_distancia_atual_y(20 downto 14) <= "011" & s_distancia_atual_y(11 downto 8);
-
-    -- Multiplexadores para Transmissão Serial
-
-    MuxTxDistanciaX: mux_8x1_n 
-        generic map(
-            BITS    => 7 
-        )
-        port map( 
-            D0      => s_ascii_angulo_servo_x(22 downto 16),
-            D1      => s_ascii_angulo_servo_x(14 downto  8),
-            D2      => s_ascii_angulo_servo_x( 6 downto  0),
-            D3      => "0101100",
-            D4      => s_ascii_distancia_atual_x(20 downto 14),
-            D5      => s_ascii_distancia_atual_x(13 downto  7),
-            D6      => s_ascii_distancia_atual_x( 6 downto  0),
-            D7      => "0100011",
-            SEL     => s_contagem_mux_tx,
-            MUX_OUT => s_saida_mux_x
-        );
-
-    MuxTxDistanciaY: mux_8x1_n 
-        generic map(
-            BITS    => 7 
-        )
-        port map( 
-            D0      => s_ascii_angulo_servo_y(22 downto 16),
-            D1      => s_ascii_angulo_servo_y(14 downto  8),
-            D2      => s_ascii_angulo_servo_y( 6 downto  0),
-            D3      => "0101100",
-            D4      => s_ascii_distancia_atual_y(20 downto 14),
-            D5      => s_ascii_distancia_atual_y(13 downto  7),
-            D6      => s_ascii_distancia_atual_y( 6 downto  0),
-            D7      => "0100011",
-            SEL     => s_contagem_mux_tx,
-            MUX_OUT => s_saida_mux_y
-        );
-    
-    with s_contagem_tx select
-        s_dados_ascii <= 
-            s_saida_mux_y when "1",
-            s_saida_mux_x when others;
-    
-    
-    TransmissorSerial: tx_serial_7E2 
-        port map (
-            clock         => clock,
-            reset         => reset, 
-            partida       => tx_partida,
-            dados_ascii   => s_dados_ascii,
-            saida_serial  => saida_serial,
-            tick          => open,
-            contador_bits => open,
-            pronto        => s_fim_tx
-        );
-
 
     ReceptorCuboVirtual: receptor_cubo_virtual 
         port map(
@@ -363,6 +279,9 @@ begin
         s_distancia_cubo <=
             s_distancia_cubo_virtual when '1',
             s_distancia_cubo_real when '0';
+
+    -- Saídas
+    fim_timer_2s    <= s_fim_timer_2s;
 
     -- Depuração
     db_angulo_medido_x  <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
