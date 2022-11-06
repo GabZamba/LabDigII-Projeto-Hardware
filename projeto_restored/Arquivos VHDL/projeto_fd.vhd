@@ -52,12 +52,13 @@ architecture arch of projeto_fd is
             reset   : in  std_logic;
             echo    : in  std_logic;
     
-            trigger             : out std_logic;
-            fim_medida          : out std_logic;
-            pronto              : out std_logic;
-            distancia_anterior  : out std_logic_vector(15 downto 0);
-            distancia_atual     : out std_logic_vector(15 downto 0);
-            db_distancia_medida : out std_logic_vector(15 downto 0)
+            trigger                 : out std_logic;
+            fim_medida              : out std_logic;
+            pronto                  : out std_logic;
+            distancia_atual_int     : out std_logic_vector( 9 downto 0);
+            distancia_anterior_BCD  : out std_logic_vector(15 downto 0);
+            distancia_atual_BCD     : out std_logic_vector(15 downto 0);
+            db_distancia_medida     : out std_logic_vector(15 downto 0)
         );
     end component;
 
@@ -152,7 +153,11 @@ architecture arch of projeto_fd is
 
     signal  s_fim_timer_2s
         : std_logic;
-    signal  s_distancia_atual_x, s_distancia_atual_y, s_distancia_cubo_real, s_distancia_cubo_virtual, s_distancia_cubo           
+    signal  s_distancia_int_atual_x, s_distancia_int_atual_y, s_distancia_int_cubo_real, s_distancia_cubo
+        : std_logic_vector( 9 downto 0);
+    signal  s_distancia_cubo_tx
+        : std_logic_vector(11 downto 0);
+    signal  s_distancia_BCD_atual_x, s_distancia_BCD_atual_y, s_distancia_BCD_cubo_real, s_distancia_cubo_virtual
         : std_logic_vector(15 downto 0);
     signal  s_ascii_angulo_servo_x, s_ascii_angulo_servo_y
         : std_logic_vector(23 downto 0);
@@ -163,17 +168,18 @@ begin
     -- Componentes para os sensores ultrassônicos de distância
 
     MedidorDistanciaCubo: componente_de_distancias 
-        port map(
+        port map (
             clock           => clock,
             reset           => reset,
             echo            => echo_cubo,
-
-            trigger             => trigger_cubo,
-            fim_medida          => open,
-            pronto              => fim_medida_cubo,
-            distancia_anterior  => open,
-            distancia_atual     => s_distancia_cubo_real,
-            db_distancia_medida => open
+    
+            trigger                 => trigger_cubo,
+            fim_medida              => open,
+            pronto                  => fim_medida_cubo,
+            distancia_atual_int     => s_distancia_int_cubo_real,
+            distancia_anterior_BCD  => open,
+            distancia_atual_BCD     => s_distancia_BCD_cubo_real,
+            db_distancia_medida     => open
         );
 
     MedidorDistanciaX: componente_de_distancias 
@@ -182,12 +188,13 @@ begin
             reset           => reset,
             echo            => echo_bola_x,
 
-            trigger             => trigger_bola_x,
-            fim_medida          => fim_medida_bola_x,
-            pronto              => open,
-            distancia_anterior  => open,
-            distancia_atual     => s_distancia_atual_x,
-            db_distancia_medida => db_distancia_medida_x
+            trigger                 => trigger_bola_x,
+            fim_medida              => fim_medida_bola_x,
+            pronto                  => open,
+            distancia_atual_int     => s_distancia_int_atual_x,
+            distancia_anterior_BCD  => open,
+            distancia_atual_BCD     => s_distancia_BCD_atual_x,
+            db_distancia_medida     => db_distancia_medida_x
         );
 
     MedidorDistanciaY: componente_de_distancias 
@@ -196,12 +203,13 @@ begin
             reset           => reset,
             echo            => echo_bola_y,
 
-            trigger             => trigger_bola_y,
-            fim_medida          => fim_medida_bola_y,
-            pronto              => open,
-            distancia_anterior  => open,
-            distancia_atual     => s_distancia_atual_y,
-            db_distancia_medida => db_distancia_medida_y
+            trigger                 => trigger_bola_y,
+            fim_medida              => fim_medida_bola_y,
+            pronto                  => open,
+            distancia_atual_int     => s_distancia_int_atual_y,
+            distancia_anterior_BCD  => open,
+            distancia_atual_BCD     => s_distancia_BCD_atual_y,
+            db_distancia_medida     => db_distancia_medida_y
         );
 
     -- Componentes para os dois servomotores (x e y)
@@ -212,8 +220,8 @@ begin
             reset                   => reset,
             conta_posicao_servo     => conta_posicao_servo_x,
             zera_posicao_servo      => zera_posicao_servo_x,
-            posicao_equilibrio      => s_distancia_cubo(9 downto 0),
-            distancia_medida        => s_distancia_atual_x(9 downto 0),
+            posicao_equilibrio      => s_distancia_cubo,
+            distancia_medida        => s_distancia_int_atual_x,
     
             pwm_servo               => pwm_servo_x,
             angulo_medido           => s_ascii_angulo_servo_x
@@ -225,8 +233,8 @@ begin
             reset                   => reset,
             conta_posicao_servo     => conta_posicao_servo_y,
             zera_posicao_servo      => zera_posicao_servo_y,
-            posicao_equilibrio      => s_distancia_cubo(9 downto 0),
-            distancia_medida        => s_distancia_atual_y(9 downto 0),
+            posicao_equilibrio      => s_distancia_cubo,
+            distancia_medida        => s_distancia_int_atual_y,
     
             pwm_servo               => pwm_servo_y,
             angulo_medido           => s_ascii_angulo_servo_y
@@ -255,9 +263,9 @@ begin
             clock                   => clock,
             reset                   => reset,
             partida                 => s_fim_timer_2s,
-            distancia_atual_cubo    => s_distancia_cubo(11 downto 0),
-            distancia_atual_x       => s_distancia_atual_x(11 downto 0),
-            distancia_atual_y       => s_distancia_atual_y(11 downto 0),
+            distancia_atual_cubo    => s_distancia_cubo_tx,
+            distancia_atual_x       => s_distancia_BCD_atual_x(11 downto 0),
+            distancia_atual_y       => s_distancia_BCD_atual_y(11 downto 0),
             ascii_angulo_servo_x    => s_ascii_angulo_servo_x,
             ascii_angulo_servo_y    => s_ascii_angulo_servo_y,
 
@@ -277,8 +285,13 @@ begin
 
     with cubo_select select
         s_distancia_cubo <=
-            s_distancia_cubo_virtual when '1',
-            s_distancia_cubo_real when '0';
+            s_distancia_cubo_virtual(9 downto 0)    when '1',
+            s_distancia_int_cubo_real               when '0';
+        
+    with cubo_select select
+        s_distancia_cubo_tx <=
+            s_distancia_cubo_virtual(11 downto 0)    when '1',
+            s_distancia_BCD_cubo_real(11 downto 0)   when '0';
 
     -- Saídas
     fim_timer_2s    <= s_fim_timer_2s;

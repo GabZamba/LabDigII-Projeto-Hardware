@@ -10,12 +10,13 @@ entity componente_de_distancias is
         reset   : in  std_logic;
         echo    : in  std_logic;
 
-        trigger             : out std_logic;
-        fim_medida          : out std_logic;
-        pronto              : out std_logic;
-        distancia_anterior  : out std_logic_vector(15 downto 0);
-        distancia_atual     : out std_logic_vector(15 downto 0);
-        db_distancia_medida : out std_logic_vector(15 downto 0)
+        trigger                 : out std_logic;
+        fim_medida              : out std_logic;
+        pronto                  : out std_logic;
+        distancia_atual_int     : out std_logic_vector( 9 downto 0);
+        distancia_anterior_BCD  : out std_logic_vector(15 downto 0);
+        distancia_atual_BCD     : out std_logic_vector(15 downto 0);
+        db_distancia_medida     : out std_logic_vector(15 downto 0)
     );
 end entity;
 
@@ -95,7 +96,9 @@ architecture arch of componente_de_distancias is
             dist2           : in  std_logic_vector (15 downto 0);
             dist3           : in  std_logic_vector (15 downto 0);
             dist4           : in  std_logic_vector (15 downto 0);
-            resultado       : out std_logic_vector (15 downto 0)
+    
+            resultadoInt    : out std_logic_vector ( 9 downto 0);
+            resultadoBCD    : out std_logic_vector (15 downto 0)
         );
     end component comparador_de_distancias;
 
@@ -108,8 +111,10 @@ architecture arch of componente_de_distancias is
         : std_logic := '0';
     signal  s_contagem_atual 
         : std_logic_vector (1 downto 0);
-    signal  s_distancia_medida, s_distancia_atual, s_distancia_anterior,
-            s_dist1, s_dist2, s_dist3, s_dist4, s_distancia_aproximada     
+    signal  s_distancia_aproximada_int, s_distancia_atual_int
+        : std_logic_vector (9 downto 0);
+    signal  s_distancia_medida, s_distancia_atual_BCD, s_distancia_anterior_BCD,
+            s_dist1, s_dist2, s_dist3, s_dist4, s_distancia_aproximada_BCD     
         : std_logic_vector(15 downto 0);
     
     
@@ -264,11 +269,13 @@ begin
             dist2           => s_dist2,
             dist3           => s_dist3,
             dist4           => s_dist4,
-            resultado       => s_distancia_aproximada
+
+            resultadoInt    => s_distancia_aproximada_int,
+            resultadoBCD    => s_distancia_aproximada_BCD
         );
 
-    -- Registrador com o valor da medida atual da distância (após correção/aproximação)
-    DistanciaAtual: registrador_n
+    -- Registrador com o valor da medida atual BCD da distância (após correção/aproximação)
+    DistanciaAtualBCD: registrador_n
         generic map (
             N   => 16
         )
@@ -276,13 +283,25 @@ begin
             clock  => clock,
             clear  => reset,
             enable => s_registra_atual,
-            D      => s_distancia_aproximada,
-            Q      => s_distancia_atual
+            D      => s_distancia_aproximada_BCD,
+            Q      => s_distancia_atual_BCD
         );
     
+    -- Registrador com o valor da medida inteira da distância (após correção/aproximação)
+    DistanciaAtualInt: registrador_n
+        generic map (
+            N   => 10
+        )
+        port map (
+            clock  => clock,
+            clear  => reset,
+            enable => s_registra_atual,
+            D      => s_distancia_aproximada_int,
+            Q      => s_distancia_atual_int
+        );
     
-    -- Registrador com o valor da medida anterior de distância (valor será usado no cálculo de velocidade)
-    DistanciaAnterior: registrador_n
+    -- Registrador com o valor da medida anterior de distância BCD (valor será usado no cálculo de velocidade)
+    DistanciaAnteriorBCD: registrador_n
         generic map (
             N   => 16
         )
@@ -290,15 +309,16 @@ begin
             clock  => clock,
             clear  => reset,
             enable => s_registra_anterior,
-            D      => s_distancia_atual,
-            Q      => s_distancia_anterior
+            D      => s_distancia_atual_BCD,
+            Q      => s_distancia_anterior_BCD
         );
 
 
     -- Saídas
-    fim_medida          <= s_fim_medida;
-    distancia_atual     <= s_distancia_atual;
-    distancia_anterior  <= s_distancia_anterior;
+    fim_medida              <= s_fim_medida;
+    distancia_atual_BCD     <= s_distancia_atual_BCD;
+    distancia_atual_int     <= s_distancia_atual_int;
+    distancia_anterior_BCD  <= s_distancia_anterior_BCD;
 
     -- Depuracao
     db_distancia_medida <= s_distancia_medida;

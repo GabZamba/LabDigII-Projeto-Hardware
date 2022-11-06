@@ -12,7 +12,9 @@ entity comparador_de_distancias is
         dist2           : in  std_logic_vector (15 downto 0);
         dist3           : in  std_logic_vector (15 downto 0);
         dist4           : in  std_logic_vector (15 downto 0);
-        resultado       : out std_logic_vector (15 downto 0)
+
+        resultadoInt    : out std_logic_vector ( 9 downto 0);
+        resultadoBCD    : out std_logic_vector (15 downto 0)
     );
 end entity comparador_de_distancias;
 
@@ -74,8 +76,10 @@ begin
 
     end process;
 
+    resultadoInt <= std_logic_vector(to_unsigned( result, 10));
+
     -- converte o resultado (inteiro) para BCD 4 Digitos
-    resultado <=    std_logic_vector(to_unsigned( result / 1000, 4)) &
+    resultadoBCD <= std_logic_vector(to_unsigned( result / 1000, 4)) &
                     std_logic_vector(to_unsigned( (result mod 1000) / 100, 4)) &
                     std_logic_vector(to_unsigned( (result mod 100) / 10, 4)) &
                     std_logic_vector(to_unsigned( (result mod 10), 4));
