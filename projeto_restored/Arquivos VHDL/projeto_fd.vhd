@@ -8,22 +8,12 @@ entity projeto_fd is
     port (
         clock                   : in  std_logic;
         reset                   : in  std_logic;
-        conta_posicao_servo_x   : in  std_logic;
-        conta_posicao_servo_y   : in  std_logic;
-        zera_posicao_servo_x    : in  std_logic;
-        zera_posicao_servo_y    : in  std_logic;
-        conta_tx                : in  std_logic;
-        zera_contador_tx        : in  std_logic;
-        distancia_medir         : in  std_logic;    -- não mais usado
         cubo_select             : in  std_logic;
         echo_cubo               : in  std_logic;
         echo_bola_x             : in  std_logic;
         echo_bola_y             : in  std_logic;
-        tx_partida              : in  std_logic;
-        timer_zera              : in  std_logic;
         entrada_serial          : in  std_logic;
 
-        fim_contador_tx         : out std_logic;
         trigger_cubo            : out std_logic;
         trigger_bola_x          : out std_logic;
         trigger_bola_y          : out std_logic;
@@ -33,8 +23,6 @@ entity projeto_fd is
         pwm_servo_x             : out std_logic;
         pwm_servo_y             : out std_logic;
         saida_serial            : out std_logic;
-        tx_pronto               : out std_logic;
-        fim_timer_2s            : out std_logic;
 
         db_angulo_medido_x      : out std_logic_vector(11 downto 0);
         db_angulo_medido_y      : out std_logic_vector(11 downto 0);
@@ -66,8 +54,6 @@ architecture arch of projeto_fd is
         port (
             clock                   : in  std_logic;
             reset                   : in  std_logic;
-            conta_posicao_servo     : in  std_logic;
-            zera_posicao_servo      : in  std_logic;
             posicao_equilibrio      : in  std_logic_vector (9 downto 0);
             distancia_medida        : in  std_logic_vector (9 downto 0);
     
@@ -151,7 +137,7 @@ architecture arch of projeto_fd is
     end component;
 
 
-    signal  s_fim_timer_2s
+    signal  s_partida_tx
         : std_logic;
     signal  s_distancia_int_atual_x, s_distancia_int_atual_y, s_distancia_int_cubo_real, s_distancia_cubo
         : std_logic_vector( 9 downto 0);
@@ -218,8 +204,6 @@ begin
         port map (
             clock                   => clock,
             reset                   => reset,
-            conta_posicao_servo     => conta_posicao_servo_x,
-            zera_posicao_servo      => zera_posicao_servo_x,
             posicao_equilibrio      => s_distancia_cubo,
             distancia_medida        => s_distancia_int_atual_x,
     
@@ -231,8 +215,6 @@ begin
         port map (
             clock                   => clock,
             reset                   => reset,
-            conta_posicao_servo     => conta_posicao_servo_y,
-            zera_posicao_servo      => zera_posicao_servo_y,
             posicao_equilibrio      => s_distancia_cubo,
             distancia_medida        => s_distancia_int_atual_y,
     
@@ -240,20 +222,20 @@ begin
             angulo_medido           => s_ascii_angulo_servo_y
         );
 
-    -- timer de 2s entre cada medição
-    Timer2Seg: contador_m 
+    -- timer de 100ms entre cada transmissão
+    Timer100ms: contador_m 
         generic map (
-            M => 100000000,  
-            N => 20 
-            -- M => 100,  
-            -- N => 7 
+            M => 5_000_000, -- 5.000.000 * 20ns = 100ms
+            N => 23
+            -- M => 100,
+            -- N => 7
         )
         port map (
             clock => clock,
-            zera  => timer_zera,
+            zera  => reset,
             conta => '1',
             Q     => open,
-            fim   => s_fim_timer_2s,
+            fim   => s_partida_tx,
             meio  => open
         );
 
@@ -262,7 +244,7 @@ begin
         port map (
             clock                   => clock,
             reset                   => reset,
-            partida                 => s_fim_timer_2s,
+            partida                 => s_partida_tx,
             distancia_atual_cubo    => s_distancia_cubo_tx,
             distancia_atual_x       => s_distancia_BCD_atual_x(11 downto 0),
             distancia_atual_y       => s_distancia_BCD_atual_y(11 downto 0),
@@ -292,9 +274,6 @@ begin
         s_distancia_cubo_tx <=
             s_distancia_cubo_virtual(11 downto 0)    when '1',
             s_distancia_BCD_cubo_real(11 downto 0)   when '0';
-
-    -- Saídas
-    fim_timer_2s    <= s_fim_timer_2s;
 
     -- Depuração
     db_angulo_medido_x  <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);

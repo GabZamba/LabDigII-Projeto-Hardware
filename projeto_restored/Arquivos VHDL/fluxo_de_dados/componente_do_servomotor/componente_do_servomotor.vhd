@@ -8,8 +8,6 @@ entity componente_do_servomotor is
     port (
         clock                   : in  std_logic;
         reset                   : in  std_logic;
-        conta_posicao_servo     : in  std_logic;
-        zera_posicao_servo      : in  std_logic;
         posicao_equilibrio      : in  std_logic_vector (9 downto 0);
         distancia_medida        : in  std_logic_vector (9 downto 0);
 
