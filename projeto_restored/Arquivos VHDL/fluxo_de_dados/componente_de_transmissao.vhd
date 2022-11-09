@@ -170,9 +170,9 @@ begin
             BITS    => 7 
         )
         port map( 
-            D0      => "0000000",   -- angulo do cubo é 0
-            D1      => "0000000",
-            D2      => "0000000",
+            D0      => "0110000",   -- angulo do cubo é 0
+            D1      => "0110000",
+            D2      => "0110000",
             D3      => "0101100",   -- ,
             D4      => s_ascii_distancia_atual_cubo(20 downto 14),
             D5      => s_ascii_distancia_atual_cubo(13 downto  7),
@@ -223,7 +223,7 @@ begin
             s_saida_mux_cubo    when "00",
             s_saida_mux_x       when "01",
             s_saida_mux_y       when "10",
-				"0000000"           when others;
+			s_saida_mux_cubo    when others;
 
     TransmissorSerial: tx_serial_7E2 
         port map (

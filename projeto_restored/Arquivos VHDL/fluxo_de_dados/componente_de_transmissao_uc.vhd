@@ -33,10 +33,10 @@ architecture fsm_arch of componente_de_transmissao_uc is
 begin
 
     -- estado
-    process (reset, clock, partida)
+    process (reset, clock)
 
     begin
-        if reset = '1' or partida = '0' then
+        if reset = '1' then
             Eatual <= inicial;
         elsif clock'event and clock = '1' then
             Eatual <= Eprox; 
