@@ -13,13 +13,14 @@ architecture tb of componente_de_distancias_tb is
             clock   : in  std_logic;
             reset   : in  std_logic;
             echo    : in  std_logic;
-
-            trigger             : out std_logic;
-            fim_medida          : out std_logic;
-            pronto              : out std_logic;
-            distancia_anterior  : out std_logic_vector(15 downto 0);
-            distancia_atual     : out std_logic_vector(15 downto 0);
-            db_distancia_medida : out std_logic_vector(15 downto 0)
+    
+            trigger                 : out std_logic;
+            fim_medida              : out std_logic;
+            pronto                  : out std_logic;
+            distancia_atual_int     : out std_logic_vector( 9 downto 0);
+            distancia_anterior_BCD  : out std_logic_vector(15 downto 0);
+            distancia_atual_BCD     : out std_logic_vector(15 downto 0);
+            db_distancia_medida     : out std_logic_vector(15 downto 0)
         );
     end component;
   
@@ -49,15 +50,25 @@ architecture tb of componente_de_distancias_tb is
     constant casos_teste : casos_teste_array :=
         (
             -- primeiras 4 medidas
-            (1, 5882),  -- 5882us (1000mm)
-            (1, 5899),  -- 5899us (1002,9mm) arredondar para 1003mm
-            (1, 6000),  -- 6000us (1020,1mm) truncar para 1020mm
-            (1, 5800),  -- 5800us ( 986,1mm) truncar para 986mm
+            (1, 7588),  -- 5882us (1000mm)
+            (1, 7589),  -- 5899us (1002,9mm) arredondar para 1003mm
+            (1, 7600),  -- 6000us (1020,1mm) truncar para 1020mm
+            (1, 7580),  -- 5800us ( 986,1mm) truncar para 986mm
+            -- primeiras 4 medidas
+            (2, 6600),  -- 5882us (1000mm)
+            (2, 6499),  -- 5899us (1002,9mm) arredondar para 1003mm
+            (2, 6900),  -- 6000us (1020,1mm) truncar para 1020mm
+            (2, 6800),  -- 5800us ( 986,1mm) truncar para 986mm
+            -- primeiras 4 medidas
+            (3, 15882),  -- 5882us (1000mm)
+            (3, 15899),  -- 5899us (1002,9mm) arredondar para 1003mm
+            (3, 16000),  -- 6000us (1020,1mm) truncar para 1020mm
+            (3, 15800),  -- 5800us ( 986,1mm) truncar para 986mm
             -- próximas 4 medidas
-            (2, 4353),  -- 4353us (740mm)
-            (2, 4399),  -- 4399us (747,9mm)  arredondar para 748mm
-            (2, 4412),  -- 4412us (750mm)
-            (2, 29410)  -- 29410us (5m, acima de 4m, o limite máximo)
+            (4, 24353),  -- 4353us (740mm)
+            (4, 24399),  -- 4399us (747,9mm)  arredondar para 748mm
+            (4, 24412),  -- 4412us (750mm)
+            (4, 30100)  -- 29410us (5m, acima de 4m, o limite máximo)
             -- inserir aqui outros casos de teste (inserir "," na linha anterior)
         );
 
@@ -78,12 +89,13 @@ begin
             reset     => reset_in,
             echo      => echo_in,
 
-            trigger     => trigger_out,
-            fim_medida  => fim_medida_out,
-            pronto      => pronto_out,
-            distancia_anterior  => medida_anterior_out,
-            distancia_atual     => medida_atual_out,
-            db_distancia_medida => db_medida
+            trigger                 => trigger_out,
+            fim_medida              => fim_medida_out,
+            pronto                  => pronto_out,
+            distancia_atual_int     => open,
+            distancia_anterior_BCD  => medida_anterior_out,
+            distancia_atual_BCD     => medida_atual_out,
+            db_distancia_medida     => db_medida
         );
 
     -- geracao dos sinais de entrada (estimulos)
@@ -111,7 +123,7 @@ begin
             -- 1) determina largura do pulso echo
             assert false report "Caso de teste " & integer'image(casos_teste(i).id) & ": " &
                 integer'image(casos_teste(i).tempo) & "us" severity note;
-            larguraPulso <= casos_teste(i).tempo * 1 us; -- caso de teste "i"
+            larguraPulso <= casos_teste(i).tempo * 100 ns; -- caso de teste "i"
             caso <= casos_teste(i).id;
             valorMedido <= 0;
 
@@ -149,11 +161,11 @@ begin
                 to_integer(unsigned(medida_anterior_out(7 downto 4)))*10 +
                 to_integer(unsigned(medida_anterior_out(3 downto 0)));
 
-            wait for 1000 us;
+            wait for 2000 us;
             assert false report "Fim do caso " & integer'image(casos_teste(i).id) & ", valor medido: " & integer'image(valorMedido) severity note;
         
             -- 7) espera entre casos de tese
-            wait for 100 us;
+            -- wait for 100 us;
 
         end loop;
 
