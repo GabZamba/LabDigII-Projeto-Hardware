@@ -180,8 +180,9 @@ begin
             distancia_atual_int     => s_distancia_int_atual_x,
             distancia_anterior_BCD  => open,
             distancia_atual_BCD     => s_distancia_BCD_atual_x,
-            db_distancia_medida     => db_distancia_medida_x
+            db_distancia_medida     => open
         );
+    db_distancia_medida_x <= s_distancia_BCD_atual_x;
 
     MedidorDistanciaY: componente_de_distancias 
         port map(
@@ -223,9 +224,9 @@ begin
         );
 
     -- timer de 100ms entre cada transmissão
-    Timer100ms: contador_m 
+    Timer1s: contador_m 
         generic map (
-            M => 5_000_000, -- 5.000.000 * 20ns = 100ms
+            M => 50_000_000, -- 50.000.000 * 20ns = 1000ms
             N => 23
             -- M => 100,
             -- N => 7

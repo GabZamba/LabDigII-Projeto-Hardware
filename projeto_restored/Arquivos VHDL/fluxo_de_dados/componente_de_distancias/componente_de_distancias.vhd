@@ -159,10 +159,12 @@ begin
         );
 
     -- timer usado para dar um intervalo entre cada realização de medida de distância
-    Timer1ms: contador_m 
+    Timer3ms: contador_m 
         generic map (  
-            M => 50_000,  
-            N => 20 
+            M => 100_000,  -- 150.000 * 20ns = 200ms
+            N => 17
+            -- M => 10_000_000,  -- 150.000 * 20ns = 200ms
+            -- N => 24
         )
         port map (
             clock => clock,
@@ -315,7 +317,7 @@ begin
 
 
     -- Saídas
-    fim_medida              <= s_fim_medida;
+    fim_medida              <= s_fim_medida or s_fim_timer_distMax;
     distancia_atual_BCD     <= s_distancia_atual_BCD;
     distancia_atual_int     <= s_distancia_atual_int;
     distancia_anterior_BCD  <= s_distancia_anterior_BCD;

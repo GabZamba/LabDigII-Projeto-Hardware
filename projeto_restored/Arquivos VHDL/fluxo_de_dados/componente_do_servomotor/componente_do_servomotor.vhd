@@ -92,9 +92,9 @@ begin
         );
 
     -- timer de 10ms entre cada medição do pid
-    Timer10ms: contador_m 
+    Timer1000ms: contador_m 
         generic map (
-            M => 500_000,  -- 500.000 * 20ns = 10ms
+            M => 50_000_000,  -- 500.000 * 20ns = 10ms
             N => 20 
             -- M => 100,  
             -- N => 7 
