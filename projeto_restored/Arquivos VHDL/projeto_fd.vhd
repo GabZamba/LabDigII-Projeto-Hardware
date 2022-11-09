@@ -224,10 +224,10 @@ begin
         );
 
     -- timer de 100ms entre cada transmissão
-    Timer1s: contador_m 
+    Timer10ms: contador_m 
         generic map (
-            M => 50_000_000, -- 50.000.000 * 20ns = 1000ms
-            N => 23
+            M => 500_000, -- 50.000.000 * 20ns = 1000ms
+            N => 19
             -- M => 100,
             -- N => 7
         )

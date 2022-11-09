@@ -159,9 +159,9 @@ begin
         );
 
     -- timer usado para dar um intervalo entre cada realização de medida de distância
-    Timer3ms: contador_m 
+    Timer200ms: contador_m 
         generic map (  
-            M => 100_000,  -- 150.000 * 20ns = 200ms
+            M => 100_000,  -- 100.000 * 20ns = 2ms
             N => 17
             -- M => 10_000_000,  -- 150.000 * 20ns = 200ms
             -- N => 24
