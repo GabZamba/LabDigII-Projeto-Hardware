@@ -34,7 +34,7 @@ architecture fsm_arch of componente_de_distancias_uc is
         verifica_fim_medidas,
         incrementa_contador_medida, espera_1ms,
         registra_medida_anterior, registra_medida_atual,
-        final
+        final, espera_1ms_fim
     );
 
     signal Eatual, Eprox: tipo_estado;
@@ -59,10 +59,7 @@ begin
 
             when inicial                    =>      Eprox <= gera_pulso_medida;
 
-            when gera_pulso_medida =>
-                if echo='1' then                    Eprox <= aguarda_fim_medida;
-                else                                Eprox <= gera_pulso_medida;
-                end if;
+            when gera_pulso_medida =>               Eprox <= aguarda_fim_medida;
 
             when aguarda_fim_medida =>  
                 if fim_medida='1' then              Eprox <= registra_medida_realizada;
@@ -88,7 +85,12 @@ begin
 
             when registra_medida_atual      =>      Eprox <= final;
 
-            when final                      =>      Eprox <= inicial;
+            when final                      =>      Eprox <= espera_1ms_fim;
+
+            when espera_1ms_fim =>
+                if fim_timer_1ms='1' then           Eprox <= inicial;
+                else                                Eprox <= espera_1ms_fim;
+                end if;
 
             when others                     =>      Eprox <= inicial;
 
@@ -113,7 +115,7 @@ begin
         conta_medida        <= '1' when incrementa_contador_medida, '0' when others;  
 
     with Eatual select
-        conta_1ms           <= '1' when espera_1ms, '0' when others;  
+        conta_1ms           <= '1' when espera_1ms, '1' when espera_1ms_fim, '0' when others;  
 
     with Eatual select
         registra_atual      <= '1' when registra_medida_atual, '0' when others;   
