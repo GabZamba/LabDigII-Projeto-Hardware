@@ -11,9 +11,7 @@ entity componente_de_transmissao is
         partida                 : in  std_logic;
         distancia_atual_cubo    : in  std_logic_vector(11 downto 0);
         distancia_atual_x       : in  std_logic_vector(11 downto 0);
-        distancia_atual_y       : in  std_logic_vector(11 downto 0);
         ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
-        ascii_angulo_servo_y    : in  std_logic_vector(23 downto 0);
 
         saida_serial            : out std_logic;
         pronto                  : out std_logic
@@ -95,9 +93,9 @@ architecture arch of componente_de_transmissao is
         : std_logic_vector (1 downto 0);
     signal  s_contagem_mux_tx
         : std_logic_vector (2 downto 0);
-    signal  s_saida_mux_cubo, s_saida_mux_x, s_saida_mux_y, s_dados_ascii    
+    signal  s_saida_mux_cubo, s_saida_mux_x, s_dados_ascii    
         : std_logic_vector (6 downto 0);
-    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_y, s_ascii_distancia_atual_cubo
+    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_cubo
         : std_logic_vector(20 downto 0);
 
 
@@ -160,10 +158,6 @@ begin
     s_ascii_distancia_atual_x(13 downto  7) <= "011" & distancia_atual_x( 7 downto 4);
     s_ascii_distancia_atual_x(20 downto 14) <= "011" & distancia_atual_x(11 downto 8);
 
-    s_ascii_distancia_atual_y( 6 downto  0) <= "011" & distancia_atual_y( 3 downto 0);
-    s_ascii_distancia_atual_y(13 downto  7) <= "011" & distancia_atual_y( 7 downto 4);
-    s_ascii_distancia_atual_y(20 downto 14) <= "011" & distancia_atual_y(11 downto 8);
-
     -- Multiplexadores para Transmissão Serial
     MuxTxDistanciaCubo: mux_8x1_n
         generic map(
@@ -199,30 +193,12 @@ begin
             MUX_OUT => s_saida_mux_x
         );
 
-    MuxTxDistanciaY: mux_8x1_n
-        generic map(
-            BITS    => 7 
-        )
-        port map( 
-            D0      => ascii_angulo_servo_y(22 downto 16),
-            D1      => ascii_angulo_servo_y(14 downto  8),
-            D2      => ascii_angulo_servo_y( 6 downto  0),
-            D3      => "0101100",   -- ,
-            D4      => s_ascii_distancia_atual_y(20 downto 14),
-            D5      => s_ascii_distancia_atual_y(13 downto  7),
-            D6      => s_ascii_distancia_atual_y( 6 downto  0),
-            D7      => "0001010",   -- \n
-            SEL     => s_contagem_mux_tx,
-            MUX_OUT => s_saida_mux_y
-        );
-
     -- Transmissor Serial
 
     with s_contagem_tx select
         s_dados_ascii <= 
             s_saida_mux_cubo    when "00",
             s_saida_mux_x       when "01",
-            s_saida_mux_y       when "10",
 			s_saida_mux_cubo    when others;
 
     TransmissorSerial: tx_serial_7E2 

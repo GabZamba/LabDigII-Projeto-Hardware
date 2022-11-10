@@ -9,16 +9,13 @@ entity projeto is
         reset               : in  std_logic;
         echo_cubo           : in  std_logic;
         echo_bola_x         : in  std_logic;
-        echo_bola_y         : in  std_logic;
         entrada_serial      : in  std_logic;
         cubo_select         : in  std_logic;
         display_select      : in  std_logic_vector(1 downto 0);
 
         trigger_cubo        : out std_logic;
         trigger_bola_x      : out std_logic;
-        trigger_bola_y      : out std_logic;
         pwm_servo_x         : out std_logic;
-        pwm_servo_y         : out std_logic;
         saida_serial        : out std_logic;
 
         db_display_select   : out std_logic_vector(1 downto 0);
@@ -39,23 +36,18 @@ architecture arch of projeto is
             cubo_select             : in  std_logic;
             echo_cubo               : in  std_logic;
             echo_bola_x             : in  std_logic;
-            echo_bola_y             : in  std_logic;
             entrada_serial          : in  std_logic;
     
             trigger_cubo            : out std_logic;
             trigger_bola_x          : out std_logic;
-            trigger_bola_y          : out std_logic;
             fim_medida_cubo         : out std_logic;
             fim_medida_bola_x       : out std_logic;
-            fim_medida_bola_y       : out std_logic;
             pwm_servo_x             : out std_logic;
-            pwm_servo_y             : out std_logic;
             saida_serial            : out std_logic;
     
             db_angulo_medido_x      : out std_logic_vector(11 downto 0);
-            db_angulo_medido_y      : out std_logic_vector(11 downto 0);
-            db_distancia_medida_x   : out std_logic_vector(15 downto 0);
-            db_distancia_medida_y   : out std_logic_vector(15 downto 0)
+            db_distancia_cubo       : out std_logic_vector(15 downto 0);
+            db_distancia_medida_x   : out std_logic_vector(15 downto 0)
         );
     end component;
 
@@ -82,10 +74,10 @@ architecture arch of projeto is
 
     signal  s_reset
         : std_logic; 
-    signal  s_db_angulo_medido_x, s_db_angulo_medido_y           
+    signal  s_db_angulo_medido_x           
         : std_logic_vector(11 downto 0);
-    signal  s_db_distancia_medida_x, s_db_distancia_medida_y,
-            s_db_angulo_x, s_db_angulo_y, s_saida_seletor_display
+    signal  s_db_distancia_medida_x, s_db_distancia_cubo,
+            s_db_angulo_x, s_saida_seletor_display
         : std_logic_vector(15 downto 0);
 
 
@@ -100,36 +92,30 @@ begin
             cubo_select             => cubo_select,
             echo_cubo               => echo_cubo,
             echo_bola_x             => echo_bola_x,
-            echo_bola_y             => echo_bola_y,
             entrada_serial          => entrada_serial,
     
             trigger_cubo            => trigger_cubo,
             trigger_bola_x          => trigger_bola_x,
-            trigger_bola_y          => trigger_bola_y,
             fim_medida_cubo         => open,
             fim_medida_bola_x       => open,
-            fim_medida_bola_y       => open,
             pwm_servo_x             => pwm_servo_x,
-            pwm_servo_y             => pwm_servo_y,
             saida_serial            => saida_serial,
     
             db_angulo_medido_x      => s_db_angulo_medido_x,
-            db_angulo_medido_y      => s_db_angulo_medido_y,
-            db_distancia_medida_x   => s_db_distancia_medida_x,
-            db_distancia_medida_y   => s_db_distancia_medida_y
+            db_distancia_cubo       => s_db_distancia_cubo,
+            db_distancia_medida_x   => s_db_distancia_medida_x
             
 		);
 
     -- Multiplexador para Displays de 7 Segmentos
     s_db_angulo_x   <= "0000" & s_db_angulo_medido_x;
-    s_db_angulo_y   <= "0000" & s_db_angulo_medido_y;
     Multiplexador7Seg: mux_4x1_n
         generic map (
             BITS    => 16
         )
         port map ( 
-            D3      => s_db_angulo_y,
-            D2      => s_db_distancia_medida_y,
+            D3      => s_db_angulo_x,
+            D2      => s_db_distancia_cubo,
             D1      => s_db_angulo_x,
             D0      => s_db_distancia_medida_x,
             SEL     => display_select,
