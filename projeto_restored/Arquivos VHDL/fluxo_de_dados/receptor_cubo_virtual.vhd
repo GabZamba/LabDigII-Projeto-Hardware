@@ -10,8 +10,9 @@ entity receptor_cubo_virtual is
         reset       : in  std_logic;
         dado_serial : in  std_logic;
 
-        pronto                  : out std_logic;
-        distancia_cubo_virtual  : out std_logic_vector(15 downto 0)
+        pronto              : out std_logic;
+        distancia_cubo_int  : out std_logic_vector( 9 downto 0);
+        distancia_cubo_BCD  : out std_logic_vector(15 downto 0)
     );
 end entity;
 
@@ -61,17 +62,26 @@ architecture arch of receptor_cubo_virtual is
         );
     end component registrador_n;
 
+    component conversor_BCD_int is
+        port (
+            valor_BCD   : in  std_logic_vector(11 downto 0);
+            valor_int   : out std_logic_vector( 9 downto 0)
+        );
+    end component;
+
     signal  s_puldo_dado_recebido, s_fim_contador_rx,
             s_registra_1, s_registra_2, s_registra_3,
             s_registra_distancia_final
         : std_logic;
     signal  s_contagem_rx
-        : std_logic_vector (1 downto 0);
+        : std_logic_vector ( 1 downto 0);
     signal  s_valor_rx, s_dist1_cubo, s_dist2_cubo, s_dist3_cubo
-        : std_logic_vector (3 downto 0);
+        : std_logic_vector ( 3 downto 0);
     signal  s_dado_ascii
-        : std_logic_vector (6 downto 0);
-    signal  s_distancia_recebida, s_distancia_cubo_virtual
+        : std_logic_vector ( 6 downto 0);
+    signal  s_distancia_cubo_int
+        : std_logic_vector ( 9 downto 0);
+    signal  s_distancia_recebida, s_distancia_cubo_BCD
         : std_logic_vector (11 downto 0);
 
 begin
@@ -153,7 +163,7 @@ begin
 
     s_distancia_recebida <= s_dist1_cubo & s_dist2_cubo & s_dist3_cubo;
 
-    DistanciaCuboVirtual: registrador_n
+    DistanciaCuboBCD: registrador_n
         generic map (
             N   => 12
         )
@@ -162,11 +172,29 @@ begin
             clear  => reset,
             enable => s_registra_distancia_final,
             D      => s_distancia_recebida,
-            Q      => s_distancia_cubo_virtual
+            Q      => s_distancia_cubo_BCD
+        );
+
+    Conversor: conversor_BCD_int
+        port map (
+            valor_BCD   => s_distancia_recebida,
+            valor_int   => s_distancia_cubo_int
+        );
+
+    DistanciaCuboInt: registrador_n
+        generic map (
+            N   => 10
+        )
+        port map (
+            clock  => clock,
+            clear  => reset,
+            enable => s_registra_distancia_final,
+            D      => s_distancia_cubo_int,
+            Q      => distancia_cubo_int
         );
 
     -- Saídas
-    distancia_cubo_virtual  <= "0000" & s_distancia_cubo_virtual;
+    distancia_cubo_BCD  <= "0000" & s_distancia_cubo_BCD;
     pronto <= s_registra_distancia_final;
 
 

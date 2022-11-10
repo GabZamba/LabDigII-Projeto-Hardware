@@ -63,8 +63,9 @@ architecture arch of projeto_fd is
             reset       : in  std_logic;
             dado_serial : in  std_logic;
     
-            pronto                  : out std_logic;
-            distancia_cubo_virtual  : out std_logic_vector(15 downto 0)
+            pronto              : out std_logic;
+            distancia_cubo_int  : out std_logic_vector( 9 downto 0);
+            distancia_cubo_BCD  : out std_logic_vector(15 downto 0)
         );
     end component;
 
@@ -132,11 +133,11 @@ architecture arch of projeto_fd is
 
     signal  s_partida_tx
         : std_logic;
-    signal  s_distancia_int_atual_x, s_distancia_int_cubo_real, s_distancia_cubo
+    signal  s_distancia_int_x, s_distancia_int_cubo_real, s_distancia_int_cubo_virtual, s_distancia_int_cubo
         : std_logic_vector( 9 downto 0);
-    signal  s_distancia_cubo_tx
+    signal  s_distancia_BCD_cubo
         : std_logic_vector(11 downto 0);
-    signal  s_distancia_BCD_atual_x, s_distancia_BCD_cubo_real, s_distancia_cubo_virtual
+    signal  s_distancia_BCD_x, s_distancia_BCD_cubo_real, s_distancia_BCD_cubo_virtual
         : std_logic_vector(15 downto 0);
     signal  s_ascii_angulo_servo_x
         : std_logic_vector(23 downto 0);
@@ -170,12 +171,11 @@ begin
             trigger                 => trigger_bola_x,
             fim_medida              => fim_medida_bola_x,
             pronto                  => open,
-            distancia_atual_int     => s_distancia_int_atual_x,
+            distancia_atual_int     => s_distancia_int_x,
             distancia_anterior_BCD  => open,
-            distancia_atual_BCD     => s_distancia_BCD_atual_x,
+            distancia_atual_BCD     => s_distancia_BCD_x,
             db_distancia_medida     => open
         );
-    db_distancia_medida_x <= s_distancia_BCD_atual_x;
 
     -- Componente do Servomotor
 
@@ -183,18 +183,18 @@ begin
         port map (
             clock                   => clock,
             reset                   => reset,
-            posicao_equilibrio      => s_distancia_cubo,
-            distancia_medida        => s_distancia_int_atual_x,
+            posicao_equilibrio      => s_distancia_int_cubo,
+            distancia_medida        => s_distancia_int_x,
     
             pwm_servo               => pwm_servo_x,
             angulo_medido           => s_ascii_angulo_servo_x
         );
 
     -- timer de 100ms entre cada transmissão
-    Timer10ms: contador_m 
+    Timer100ms: contador_m 
         generic map (
-            M => 500_000, -- 50.000.000 * 20ns = 1000ms
-            N => 19
+            M => 5_000_000, -- 5.000.000 * 20ns = 100ms
+            N => 23
             -- M => 100,
             -- N => 7
         )
@@ -213,8 +213,8 @@ begin
             clock                   => clock,
             reset                   => reset,
             partida                 => s_partida_tx,
-            distancia_atual_cubo    => s_distancia_cubo_tx,
-            distancia_atual_x       => s_distancia_BCD_atual_x(11 downto 0),
+            distancia_atual_cubo    => s_distancia_BCD_cubo,
+            distancia_atual_x       => s_distancia_BCD_x(11 downto 0),
             ascii_angulo_servo_x    => s_ascii_angulo_servo_x,
 
             saida_serial            => saida_serial,
@@ -227,21 +227,24 @@ begin
             reset           => reset,
             dado_serial     => entrada_serial,
 
-            distancia_cubo_virtual  => s_distancia_cubo_virtual,
-            pronto                  => open
+            distancia_cubo_int  => s_distancia_int_cubo_virtual,
+            distancia_cubo_BCD  => s_distancia_BCD_cubo_virtual,
+            pronto              => open
         );
 
     with cubo_select select
-        s_distancia_cubo <=
-            s_distancia_cubo_virtual(9 downto 0)    when '1',
-            s_distancia_int_cubo_real               when '0';
+        s_distancia_int_cubo <=
+            s_distancia_int_cubo_real       when '0',
+            s_distancia_int_cubo_virtual    when '1';
         
     with cubo_select select
-        s_distancia_cubo_tx <=
-            s_distancia_cubo_virtual(11 downto 0)    when '1',
-            s_distancia_BCD_cubo_real(11 downto 0)   when '0';
+        s_distancia_BCD_cubo <=
+            s_distancia_BCD_cubo_real(11 downto 0)      when '0',
+            s_distancia_BCD_cubo_virtual(11 downto 0)   when '1';
 
     -- Depuração
-    db_angulo_medido_x  <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
+    db_distancia_cubo       <= "0000" & s_distancia_BCD_cubo;
+    db_distancia_medida_x   <= s_distancia_BCD_x;
+    db_angulo_medido_x      <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
 
 end arch;
