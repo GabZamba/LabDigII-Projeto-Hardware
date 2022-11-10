@@ -21,36 +21,51 @@ end entity comparador_de_distancias;
 
 architecture comportamental of comparador_de_distancias is
 
-    signal v1, v2, v3, v4
+    component conversor_BCD_int is
+        port (
+            valor_BCD   : in  std_logic_vector(11 downto 0);
+            valor_int   : out std_logic_vector( 9 downto 0)
+        );
+    end component;
+
+    signal v1, v2, v3, v4, result
         : integer range 0 to DistMax_mm;
-    signal d1, d2, d3, d4, result
-        : integer range 0 to 9999; -- para os 16 digitos da distancia (2^16)
+    signal d1, d2, d3, d4
+        : std_logic_vector(9 downto 0);
 
 begin
 
     -- Converte as medidas BCD para inteiro
-    d1 <=   to_integer(unsigned(dist1(15 downto 12)))*1000 + 
-            to_integer(unsigned(dist1(11 downto 8)))*100 + 
-            to_integer(unsigned(dist1(7 downto 4)))*10 +
-            to_integer(unsigned(dist1(3 downto 0)));
-    d2 <=   to_integer(unsigned(dist2(15 downto 12)))*1000 + 
-            to_integer(unsigned(dist2(11 downto 8)))*100 + 
-            to_integer(unsigned(dist2(7 downto 4)))*10 +
-            to_integer(unsigned(dist2(3 downto 0)));
-    d3 <=   to_integer(unsigned(dist3(15 downto 12)))*1000 + 
-            to_integer(unsigned(dist3(11 downto 8)))*100 + 
-            to_integer(unsigned(dist3(7 downto 4)))*10 +
-            to_integer(unsigned(dist3(3 downto 0)));
-    d4 <=   to_integer(unsigned(dist4(15 downto 12)))*1000 + 
-            to_integer(unsigned(dist4(11 downto 8)))*100 + 
-            to_integer(unsigned(dist4(7 downto 4)))*10 +
-            to_integer(unsigned(dist4(3 downto 0)));
+    CD1: conversor_BCD_int
+        port map (
+            valor_BCD   => dist1(11 downto 0),
+            valor_int   => d1
+        );
+
+    CD2: conversor_BCD_int
+        port map (
+            valor_BCD   => dist2(11 downto 0),
+            valor_int   => d2
+        );
+    
+    CD3: conversor_BCD_int
+        port map (
+            valor_BCD   => dist3(11 downto 0),
+            valor_int   => d3
+        );
+    
+    CD4: conversor_BCD_int
+        port map (
+            valor_BCD   => dist4(11 downto 0),
+            valor_int   => d4
+        );
+    
 
     -- Se forem maiores do que a distância máxima, as anula
-    v1 <= d1 when d1 <= DistMax_mm else 0;
-    v2 <= d2 when d2 <= DistMax_mm else 0;
-    v3 <= d3 when d3 <= DistMax_mm else 0;
-    v4 <= d4 when d4 <= DistMax_mm else 0;
+    v1 <= to_integer(unsigned(d1)) when to_integer(unsigned(d1)) <= DistMax_mm else 0;
+    v2 <= to_integer(unsigned(d2)) when to_integer(unsigned(d2)) <= DistMax_mm else 0;
+    v3 <= to_integer(unsigned(d3)) when to_integer(unsigned(d3)) <= DistMax_mm else 0;
+    v4 <= to_integer(unsigned(d4)) when to_integer(unsigned(d4)) <= DistMax_mm else 0;
 
     -- Constrói o resultado da média
     process(v1, v2, v3, v4)
