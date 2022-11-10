@@ -16,8 +16,7 @@ entity componente_de_distancias_uc is
         zera_timer_distMax  : out std_logic;
         pulso_medir         : out std_logic;
         registra_medida     : out std_logic;
-        registra_atual      : out std_logic;
-        registra_anterior   : out std_logic;
+        registra_final      : out std_logic;
         conta_1ms           : out std_logic;
         conta_medida        : out std_logic;
         pronto              : out std_logic
@@ -33,7 +32,7 @@ architecture fsm_arch of componente_de_distancias_uc is
         registra_medida_realizada,
         verifica_fim_medidas,
         incrementa_contador_medida, espera_1ms,
-        registra_medida_anterior, registra_medida_atual,
+        registra_medida_final,
         final, espera_1ms_fim
     );
 
@@ -70,7 +69,7 @@ begin
             when registra_medida_realizada  =>      Eprox <= verifica_fim_medidas;
 
             when verifica_fim_medidas =>  
-                if fim_contador_medida='1' then     Eprox <= registra_medida_anterior;
+                if fim_contador_medida='1' then     Eprox <= registra_medida_final;
                 else                                Eprox <= incrementa_contador_medida;
                 end if;
             
@@ -81,9 +80,7 @@ begin
                 else                                Eprox <= espera_1ms;
                 end if;
 
-            when registra_medida_anterior   =>      Eprox <= registra_medida_atual;
-
-            when registra_medida_atual      =>      Eprox <= final;
+            when registra_medida_final      =>      Eprox <= final;
 
             when final                      =>      Eprox <= espera_1ms_fim;
 
@@ -118,13 +115,10 @@ begin
         conta_1ms           <= '1' when espera_1ms, '1' when espera_1ms_fim, '0' when others;  
 
     with Eatual select
-        registra_atual      <= '1' when registra_medida_atual, '0' when others;   
+        registra_final      <= '1' when registra_medida_final, '0' when others;    
 
     with Eatual select
-        registra_anterior   <= '1' when registra_medida_anterior, '0' when others;   
-
-    with Eatual select
-        pronto                 <= '1' when final, '0' when others;   
+        pronto              <= '1' when final, '0' when others;   
 
 
 end architecture fsm_arch;

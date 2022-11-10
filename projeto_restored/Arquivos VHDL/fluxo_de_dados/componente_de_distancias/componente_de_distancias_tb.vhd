@@ -14,27 +14,25 @@ architecture tb of componente_de_distancias_tb is
             reset   : in  std_logic;
             echo    : in  std_logic;
     
-            trigger                 : out std_logic;
-            fim_medida              : out std_logic;
-            pronto                  : out std_logic;
-            distancia_atual_int     : out std_logic_vector( 9 downto 0);
-            distancia_anterior_BCD  : out std_logic_vector(15 downto 0);
-            distancia_atual_BCD     : out std_logic_vector(15 downto 0);
-            db_distancia_medida     : out std_logic_vector(15 downto 0)
+            trigger             : out std_logic;
+            fim_medida          : out std_logic;
+            pronto              : out std_logic;
+            distancia_int       : out std_logic_vector( 9 downto 0);
+            distancia_BCD       : out std_logic_vector(15 downto 0);
+            db_distancia_medida : out std_logic_vector(15 downto 0)
         );
     end component;
   
     -- Declaração de sinais para conectar o componente a ser testado (DUT)
     --   valores iniciais para fins de simulacao (GHDL ou ModelSim)
-    signal clock_in             : std_logic := '0';
-    signal reset_in             : std_logic := '0';
-    signal echo_in              : std_logic := '0';
-    signal trigger_out          : std_logic := '0';
-    signal fim_medida_out       : std_logic := '0';
-    signal medida_atual_out     : std_logic_vector (15 downto 0) := x"0000";
-    signal medida_anterior_out  : std_logic_vector (15 downto 0) := x"0000";
-    signal db_medida            : std_logic_vector (15 downto 0) := x"0000";
-    signal pronto_out           : std_logic := '0';
+    signal clock_in         : std_logic := '0';
+    signal reset_in         : std_logic := '0';
+    signal echo_in          : std_logic := '0';
+    signal trigger_out      : std_logic := '0';
+    signal fim_medida_out   : std_logic := '0';
+    signal medida_out       : std_logic_vector (15 downto 0) := x"0000";
+    signal db_medida        : std_logic_vector (15 downto 0) := x"0000";
+    signal pronto_out       : std_logic := '0';
 
     -- Configurações do clock
     constant clockPeriod   : time      := 20 ns; -- clock de 50MHz
@@ -74,7 +72,7 @@ architecture tb of componente_de_distancias_tb is
 
     signal larguraPulso: time := 1 ns;
     signal caso  : integer := 0;
-    signal valorMedido, valorAtual, valorAnterior  : integer := 0;
+    signal valorMedido, valorAtual  : integer := 0;
 
 begin
     -- Gerador de clock: executa enquanto 'keep_simulating = 1', com o período
@@ -89,13 +87,12 @@ begin
             reset     => reset_in,
             echo      => echo_in,
 
-            trigger                 => trigger_out,
-            fim_medida              => fim_medida_out,
-            pronto                  => pronto_out,
-            distancia_atual_int     => open,
-            distancia_anterior_BCD  => medida_anterior_out,
-            distancia_atual_BCD     => medida_atual_out,
-            db_distancia_medida     => db_medida
+            trigger             => trigger_out,
+            fim_medida          => fim_medida_out,
+            pronto              => pronto_out,
+            distancia_int       => open,
+            distancia_BCD       => medida_out,
+            db_distancia_medida => db_medida
         );
 
     -- geracao dos sinais de entrada (estimulos)
@@ -150,16 +147,10 @@ begin
                 to_integer(unsigned(db_medida(3 downto 0)));
 
             valorAtual <= 
-                to_integer(unsigned(medida_atual_out(15 downto 12)))*1000 + 
-                to_integer(unsigned(medida_atual_out(11 downto 8)))*100 + 
-                to_integer(unsigned(medida_atual_out(7 downto 4)))*10 +
-                to_integer(unsigned(medida_atual_out(3 downto 0)));
-
-            valorAnterior <= 
-                to_integer(unsigned(medida_anterior_out(15 downto 12)))*1000 + 
-                to_integer(unsigned(medida_anterior_out(11 downto 8)))*100 + 
-                to_integer(unsigned(medida_anterior_out(7 downto 4)))*10 +
-                to_integer(unsigned(medida_anterior_out(3 downto 0)));
+                to_integer(unsigned(medida_out(15 downto 12)))*1000 + 
+                to_integer(unsigned(medida_out(11 downto 8)))*100 + 
+                to_integer(unsigned(medida_out(7 downto 4)))*10 +
+                to_integer(unsigned(medida_out(3 downto 0)));
 
             wait for 2000 us;
             assert false report "Fim do caso " & integer'image(casos_teste(i).id) & ", valor medido: " & integer'image(valorMedido) severity note;

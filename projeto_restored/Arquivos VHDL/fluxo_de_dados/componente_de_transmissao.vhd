@@ -9,8 +9,8 @@ entity componente_de_transmissao is
         clock                   : in  std_logic;
         reset                   : in  std_logic;
         partida                 : in  std_logic;
-        distancia_atual_cubo    : in  std_logic_vector(11 downto 0);
-        distancia_atual_x       : in  std_logic_vector(11 downto 0);
+        distancia_cubo          : in  std_logic_vector(11 downto 0);
+        distancia_x             : in  std_logic_vector(11 downto 0);
         ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
 
         saida_serial            : out std_logic;
@@ -95,7 +95,7 @@ architecture arch of componente_de_transmissao is
         : std_logic_vector (2 downto 0);
     signal  s_saida_mux_cubo, s_saida_mux_x, s_dados_ascii    
         : std_logic_vector (6 downto 0);
-    signal  s_ascii_distancia_atual_x, s_ascii_distancia_atual_cubo
+    signal  s_ascii_distancia_x, s_ascii_distancia_cubo
         : std_logic_vector(20 downto 0);
 
 
@@ -150,13 +150,13 @@ begin
         );
 
     -- Converter digitos para ascii
-    s_ascii_distancia_atual_cubo( 6 downto  0) <= "011" & distancia_atual_cubo( 3 downto 0);
-    s_ascii_distancia_atual_cubo(13 downto  7) <= "011" & distancia_atual_cubo( 7 downto 4);
-    s_ascii_distancia_atual_cubo(20 downto 14) <= "011" & distancia_atual_cubo(11 downto 8);
+    s_ascii_distancia_cubo( 6 downto  0) <= "011" & distancia_cubo( 3 downto 0);
+    s_ascii_distancia_cubo(13 downto  7) <= "011" & distancia_cubo( 7 downto 4);
+    s_ascii_distancia_cubo(20 downto 14) <= "011" & distancia_cubo(11 downto 8);
 
-    s_ascii_distancia_atual_x( 6 downto  0) <= "011" & distancia_atual_x( 3 downto 0);
-    s_ascii_distancia_atual_x(13 downto  7) <= "011" & distancia_atual_x( 7 downto 4);
-    s_ascii_distancia_atual_x(20 downto 14) <= "011" & distancia_atual_x(11 downto 8);
+    s_ascii_distancia_x( 6 downto  0) <= "011" & distancia_x( 3 downto 0);
+    s_ascii_distancia_x(13 downto  7) <= "011" & distancia_x( 7 downto 4);
+    s_ascii_distancia_x(20 downto 14) <= "011" & distancia_x(11 downto 8);
 
     -- Multiplexadores para Transmissão Serial
     MuxTxDistanciaCubo: mux_8x1_n
@@ -168,9 +168,9 @@ begin
             D1      => "0110000",
             D2      => "0110000",
             D3      => "0101100",   -- ,
-            D4      => s_ascii_distancia_atual_cubo(20 downto 14),
-            D5      => s_ascii_distancia_atual_cubo(13 downto  7),
-            D6      => s_ascii_distancia_atual_cubo( 6 downto  0),
+            D4      => s_ascii_distancia_cubo(20 downto 14),
+            D5      => s_ascii_distancia_cubo(13 downto  7),
+            D6      => s_ascii_distancia_cubo( 6 downto  0),
             D7      => "0100011",   -- #
             SEL     => s_contagem_mux_tx,
             MUX_OUT => s_saida_mux_cubo
@@ -185,9 +185,9 @@ begin
             D1      => ascii_angulo_servo_x(14 downto  8),
             D2      => ascii_angulo_servo_x( 6 downto  0),
             D3      => "0101100",   -- ,
-            D4      => s_ascii_distancia_atual_x(20 downto 14),
-            D5      => s_ascii_distancia_atual_x(13 downto  7),
-            D6      => s_ascii_distancia_atual_x( 6 downto  0),
+            D4      => s_ascii_distancia_x(20 downto 14),
+            D5      => s_ascii_distancia_x(13 downto  7),
+            D6      => s_ascii_distancia_x( 6 downto  0),
             D7      => "0100011",   -- #
             SEL     => s_contagem_mux_tx,
             MUX_OUT => s_saida_mux_x

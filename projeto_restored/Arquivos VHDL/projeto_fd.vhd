@@ -35,13 +35,12 @@ architecture arch of projeto_fd is
             reset   : in  std_logic;
             echo    : in  std_logic;
     
-            trigger                 : out std_logic;
-            fim_medida              : out std_logic;
-            pronto                  : out std_logic;
-            distancia_atual_int     : out std_logic_vector( 9 downto 0);
-            distancia_anterior_BCD  : out std_logic_vector(15 downto 0);
-            distancia_atual_BCD     : out std_logic_vector(15 downto 0);
-            db_distancia_medida     : out std_logic_vector(15 downto 0)
+            trigger             : out std_logic;
+            fim_medida          : out std_logic;
+            pronto              : out std_logic;
+            distancia_int       : out std_logic_vector( 9 downto 0);
+            distancia_BCD       : out std_logic_vector(15 downto 0);
+            db_distancia_medida : out std_logic_vector(15 downto 0)
         );
     end component;
 
@@ -120,8 +119,8 @@ architecture arch of projeto_fd is
             clock                   : in  std_logic;
             reset                   : in  std_logic;
             partida                 : in  std_logic;
-            distancia_atual_cubo    : in  std_logic_vector(11 downto 0);
-            distancia_atual_x       : in  std_logic_vector(11 downto 0);
+            distancia_cubo    : in  std_logic_vector(11 downto 0);
+            distancia_x       : in  std_logic_vector(11 downto 0);
             ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
 
             saida_serial            : out std_logic;
@@ -153,13 +152,12 @@ begin
             reset           => reset,
             echo            => echo_cubo,
     
-            trigger                 => trigger_cubo,
-            fim_medida              => open,
-            pronto                  => fim_medida_cubo,
-            distancia_atual_int     => s_distancia_int_cubo_real,
-            distancia_anterior_BCD  => open,
-            distancia_atual_BCD     => s_distancia_BCD_cubo_real,
-            db_distancia_medida     => open
+            trigger             => trigger_cubo,
+            fim_medida          => open,
+            pronto              => fim_medida_cubo,
+            distancia_int       => s_distancia_int_cubo_real,
+            distancia_BCD       => s_distancia_BCD_cubo_real,
+            db_distancia_medida => open
         );
 
     MedidorDistanciaX: componente_de_distancias 
@@ -168,13 +166,12 @@ begin
             reset           => reset,
             echo            => echo_bola_x,
 
-            trigger                 => trigger_bola_x,
-            fim_medida              => fim_medida_bola_x,
-            pronto                  => open,
-            distancia_atual_int     => s_distancia_int_x,
-            distancia_anterior_BCD  => open,
-            distancia_atual_BCD     => s_distancia_BCD_x,
-            db_distancia_medida     => open
+            trigger             => trigger_bola_x,
+            fim_medida          => fim_medida_bola_x,
+            pronto              => open,
+            distancia_int       => s_distancia_int_x,
+            distancia_BCD       => s_distancia_BCD_x,
+            db_distancia_medida => open
         );
 
     -- Componente do Servomotor
@@ -213,8 +210,8 @@ begin
             clock                   => clock,
             reset                   => reset,
             partida                 => s_partida_tx,
-            distancia_atual_cubo    => s_distancia_BCD_cubo,
-            distancia_atual_x       => s_distancia_BCD_x(11 downto 0),
+            distancia_cubo          => s_distancia_BCD_cubo,
+            distancia_x             => s_distancia_BCD_x(11 downto 0),
             ascii_angulo_servo_x    => s_ascii_angulo_servo_x,
 
             saida_serial            => saida_serial,
