@@ -156,11 +156,13 @@ begin
         );
 
     -- timer usado para dar um intervalo entre cada realização de medida de distância
-    Timer200ms: contador_m 
+    TimerEntreMedidas: contador_m 
         generic map (  
-            M => 100_000,  -- 100.000 * 20ns = 2ms
-            N => 17
-            -- M => 10_000_000,  -- 150.000 * 20ns = 200ms
+            -- M => 100_000,  -- 100.000 * 20ns = 2ms
+            -- N => 17
+            M => 1_000_000,  -- 1.000.000 * 20ns = 20ms
+            N => 20
+            -- M => 10_000_000,  -- 10.000.000 * 20ns = 200ms
             -- N => 24
         )
         port map (
@@ -175,8 +177,7 @@ begin
     -- timer de limite para espera do sinal do sonar (4m ~> 23ms)
     TimerDistMax: contador_m 
         generic map (  
-            M => 147_050,    -- 147.050 * 20ns = 50cm * 58.82us/cm
-            -- M => 1_250_000,  -- 1.250.000 * 20ns = 25ms (pouco mais de 4m)
+            M => 1_250_000,  -- 1.250.000 * 20ns = 25ms (pouco mais de 4m)
             N => 21 
         )
         port map (

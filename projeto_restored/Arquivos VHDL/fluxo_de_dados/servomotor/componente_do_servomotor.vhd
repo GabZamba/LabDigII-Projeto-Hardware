@@ -91,11 +91,11 @@ begin
             saida    => angulo_medido
         );
 
-    -- timer de 10ms entre cada medição do pid
-    Timer1000ms: contador_m 
+    -- timer de 100ms entre cada medição do pid
+    Timer100ms: contador_m 
         generic map (
-            M => 50_000_000,  -- 500.000 * 20ns = 10ms
-            N => 20 
+            M => 5_000_000,  -- 5.000.000 * 20ns = 100ms
+            N => 23 
             -- M => 100,  
             -- N => 7 
         )
