@@ -29,7 +29,7 @@ architecture arch of componente_do_servomotor is
         );
     end component;
 
-    component pid_alternativo is
+    component pid is
         port (
             pulso_calcular      : in  std_logic; -- Periodo de 10 ms
             equilibrio          : in  std_logic_vector (9 downto 0);
@@ -69,7 +69,7 @@ architecture arch of componente_do_servomotor is
 
 begin
 
-    CalculoPID: pid_alternativo 
+    CalculoPID: pid 
         port map (
             pulso_calcular      => s_pulso_calcular, -- Periodo de 10 ms
             equilibrio          => posicao_equilibrio,
