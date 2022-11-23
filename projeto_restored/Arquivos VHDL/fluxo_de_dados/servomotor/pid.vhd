@@ -8,14 +8,17 @@ entity pid is
         pulso_calcular      : in  std_logic; -- Periodo de 10 ms
         equilibrio          : in  std_logic_vector (9 downto 0);
         distancia_medida    : in  std_logic_vector (9 downto 0); 
-        posicao_servo       : out std_logic_vector (9 downto 0) 
+        p_externo           : in  std_logic_vector (9 downto 0);
+        i_externo           : in  std_logic_vector (9 downto 0);
+        d_externo           : in  std_logic_vector (9 downto 0);
+        
+        posicao_servo       : out std_logic_vector (9 downto 0);
+        db_erro_atual       : out std_logic_vector (9 downto 0)
     );
 end pid;
 
 
 architecture behavioral of pid is
-
-    -- TODO: Colocar limite de range dos integers?
 
     -- Utilizando valores inteiros para as constantes, para se obter o valor real, deve-se dividir por 100 os seus respectivos valores
     constant Kp                 : integer := 50; 
@@ -42,9 +45,11 @@ begin
 
             erro_atual      := to_integer(unsigned(equilibrio)) - to_integer(unsigned(distancia_medida));
 
-            p           := Kp * erro_atual; 
-            i           := Ki * (erro_atual + erro_acumulado);
-            d           := Kd * (erro_atual - erro_antigo) / 100; -- dividindo pelo tempo que decorreu entre as amostras
+            db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
+
+            p           := to_integer(unsigned(p_externo)) * erro_atual; 
+            i           := to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
+            d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 100; -- dividindo pelo tempo que decorreu entre as amostras
             saida_atual :=  saida_antiga + (p + i + d) / 100; -- Obtendo os valores reais para Kp Kd e Ki 
 
             if saida_atual >= 1024    then saida_atual := 1023; end if;     

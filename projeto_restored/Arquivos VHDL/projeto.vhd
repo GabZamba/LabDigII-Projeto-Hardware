@@ -46,6 +46,7 @@ architecture arch of projeto is
             saida_serial            : out std_logic;
     
             db_angulo_medido_x      : out std_logic_vector(11 downto 0);
+            db_pid                  : out std_logic_vector(15 downto 0);
             db_distancia_cubo       : out std_logic_vector(15 downto 0);
             db_distancia_medida_x   : out std_logic_vector(15 downto 0)
         );
@@ -77,7 +78,7 @@ architecture arch of projeto is
     signal  s_db_angulo_medido_x           
         : std_logic_vector(11 downto 0);
     signal  s_db_distancia_medida_x, s_db_distancia_cubo,
-            s_db_angulo_x, s_saida_seletor_display
+            s_db_angulo_x, s_saida_seletor_display, s_db_pid
         : std_logic_vector(15 downto 0);
 
 
@@ -102,6 +103,7 @@ begin
             saida_serial            => saida_serial,
     
             db_angulo_medido_x      => s_db_angulo_medido_x,
+            db_pid                  => s_db_pid,
             db_distancia_cubo       => s_db_distancia_cubo,
             db_distancia_medida_x   => s_db_distancia_medida_x
             
@@ -114,7 +116,7 @@ begin
             BITS    => 16
         )
         port map ( 
-            D3      => s_db_angulo_x,
+            D3      => s_db_pid,
             D2      => s_db_distancia_cubo,
             D1      => s_db_angulo_x,
             D0      => s_db_distancia_medida_x,

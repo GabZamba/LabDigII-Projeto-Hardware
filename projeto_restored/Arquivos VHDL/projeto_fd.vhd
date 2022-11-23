@@ -21,6 +21,7 @@ entity projeto_fd is
         saida_serial            : out std_logic;
 
         db_angulo_medido_x      : out std_logic_vector(11 downto 0);
+        db_pid                  : out std_logic_vector(15 downto 0);
         db_distancia_cubo       : out std_logic_vector(15 downto 0);
         db_distancia_medida_x   : out std_logic_vector(15 downto 0)
     );
@@ -50,9 +51,13 @@ architecture arch of projeto_fd is
             reset                   : in  std_logic;
             posicao_equilibrio      : in  std_logic_vector (9 downto 0);
             distancia_medida        : in  std_logic_vector (9 downto 0);
+            p_externo               : in  std_logic_vector (9 downto 0);
+            i_externo               : in  std_logic_vector (9 downto 0);
+            d_externo               : in  std_logic_vector (9 downto 0);
     
             pwm_servo               : out std_logic;
-            angulo_medido           : out std_logic_vector(23 downto 0)
+            angulo_medido           : out std_logic_vector(23 downto 0);
+            db_erro_atual           : out std_logic_vector (9 downto 0)
         );
     end component;
 
@@ -65,6 +70,21 @@ architecture arch of projeto_fd is
             pronto              : out std_logic;
             distancia_cubo_int  : out std_logic_vector( 9 downto 0);
             distancia_cubo_BCD  : out std_logic_vector(15 downto 0)
+        );
+    end component;
+
+    
+    component receptor_serial_pid is
+        port (
+            clock       : in  std_logic;
+            reset       : in  std_logic;
+            dado_serial : in  std_logic;
+
+            pronto      : out std_logic;
+            valor_p     : out std_logic_vector( 9 downto 0);
+            valor_i     : out std_logic_vector( 9 downto 0);
+            valor_d     : out std_logic_vector( 9 downto 0);
+            pid_BCD     : out std_logic_vector(23 downto 0)
         );
     end component;
 
@@ -132,13 +152,15 @@ architecture arch of projeto_fd is
 
     signal  s_partida_tx
         : std_logic;
-    signal  s_distancia_int_x, s_distancia_int_cubo_real, s_distancia_int_cubo_virtual, s_distancia_int_cubo
+    signal  s_distancia_int_x, 
+            s_distancia_int_cubo_real, s_distancia_int_cubo_virtual, s_distancia_int_cubo,
+            s_valor_p, s_valor_i, s_valor_d
         : std_logic_vector( 9 downto 0);
     signal  s_distancia_BCD_cubo
         : std_logic_vector(11 downto 0);
     signal  s_distancia_BCD_x, s_distancia_BCD_cubo_real, s_distancia_BCD_cubo_virtual
         : std_logic_vector(15 downto 0);
-    signal  s_ascii_angulo_servo_x
+    signal  s_ascii_angulo_servo_x, s_pid_BCD
         : std_logic_vector(23 downto 0);
     
     
@@ -182,9 +204,13 @@ begin
             reset                   => reset,
             posicao_equilibrio      => s_distancia_int_cubo,
             distancia_medida        => s_distancia_int_x,
+            p_externo               => s_valor_p,
+            i_externo               => s_valor_i,
+            d_externo               => s_valor_d,
     
             pwm_servo               => pwm_servo_x,
-            angulo_medido           => s_ascii_angulo_servo_x
+            angulo_medido           => s_ascii_angulo_servo_x,
+            db_erro_atual           => open
         );
 
     -- timer de 100ms entre cada transmissão
@@ -229,6 +255,20 @@ begin
             pronto              => open
         );
 
+        
+    ReceptorPID: receptor_serial_pid
+        port map (
+            clock       => clock,
+            reset       => reset,
+            dado_serial => entrada_serial,
+
+            pronto      => open,
+            valor_p     => s_valor_p,
+            valor_i     => s_valor_i,
+            valor_d     => s_valor_d,
+            pid_BCD     => s_pid_BCD
+        );
+
     with cubo_select select
         s_distancia_int_cubo <=
             s_distancia_int_cubo_real       when '0',
@@ -243,5 +283,6 @@ begin
     db_distancia_cubo       <= "0000" & s_distancia_BCD_cubo;
     db_distancia_medida_x   <= s_distancia_BCD_x;
     db_angulo_medido_x      <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
+    db_pid                  <= s_pid_BCD(23 downto 16) & s_pid_BCD( 7 downto 0);
 
 end arch;

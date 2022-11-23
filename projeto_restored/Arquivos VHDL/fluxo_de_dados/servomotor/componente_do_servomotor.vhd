@@ -10,9 +10,13 @@ entity componente_do_servomotor is
         reset                   : in  std_logic;
         posicao_equilibrio      : in  std_logic_vector (9 downto 0);
         distancia_medida        : in  std_logic_vector (9 downto 0);
+        p_externo               : in  std_logic_vector (9 downto 0);
+        i_externo               : in  std_logic_vector (9 downto 0);
+        d_externo               : in  std_logic_vector (9 downto 0);
 
         pwm_servo               : out std_logic;
-        angulo_medido           : out std_logic_vector(23 downto 0)
+        angulo_medido           : out std_logic_vector(23 downto 0);
+        db_erro_atual           : out std_logic_vector (9 downto 0)
     );
 end entity;
 
@@ -33,8 +37,13 @@ architecture arch of componente_do_servomotor is
         port (
             pulso_calcular      : in  std_logic; -- Periodo de 10 ms
             equilibrio          : in  std_logic_vector (9 downto 0);
-            distancia_medida    : in  std_logic_vector (9 downto 0);
-            posicao_servo       : out std_logic_vector (9 downto 0)
+            distancia_medida    : in  std_logic_vector (9 downto 0); 
+            p_externo           : in  std_logic_vector (9 downto 0);
+            i_externo           : in  std_logic_vector (9 downto 0);
+            d_externo           : in  std_logic_vector (9 downto 0);
+            
+            posicao_servo       : out std_logic_vector (9 downto 0);
+            db_erro_atual       : out std_logic_vector (9 downto 0)
         );
     end component;
 
@@ -74,7 +83,12 @@ begin
             pulso_calcular      => s_pulso_calcular, -- Periodo de 10 ms
             equilibrio          => posicao_equilibrio,
             distancia_medida    => distancia_medida, 
-            posicao_servo       => s_posicao_servo 
+            p_externo           => p_externo,
+            i_externo           => i_externo,
+            d_externo           => d_externo,
+            
+            posicao_servo       => s_posicao_servo,
+            db_erro_atual       => db_erro_atual
         );
     
     ControleServo: controle_servo 
