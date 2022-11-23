@@ -42,9 +42,7 @@ architecture arch of componente_de_transmissao is
             partida             : in  std_logic;
             tx_feita            : in  std_logic;
             fim_mux_tx          : in  std_logic;
-            fim_tx_total        : in  std_logic;
-
-            conta_tx_total      : out std_logic;
+    
             conta_mux_tx        : out std_logic;
             zera_contador_tx    : out std_logic;
             partida_tx          : out std_logic;
@@ -67,33 +65,14 @@ architecture arch of componente_de_transmissao is
         );
     end component;
 
-    component mux_8x1_n is
-        generic (
-            constant BITS: integer := 4
-        );
-        port ( 
-            D0      : in  std_logic_vector (BITS-1 downto 0);
-            D1      : in  std_logic_vector (BITS-1 downto 0);
-            D2      : in  std_logic_vector (BITS-1 downto 0);
-            D3      : in  std_logic_vector (BITS-1 downto 0);
-            D4      : in  std_logic_vector (BITS-1 downto 0);
-            D5      : in  std_logic_vector (BITS-1 downto 0);
-            D6      : in  std_logic_vector (BITS-1 downto 0);
-            D7      : in  std_logic_vector (BITS-1 downto 0);
-            SEL     : in  std_logic_vector (2 downto 0);
-            MUX_OUT : out std_logic_vector (BITS-1 downto 0)
-        );
-    end component;
 
-    signal  s_conta_mux_tx, s_fim_mux_tx, s_conta_tx_total, s_fim_tx_total,
+    signal  s_conta_mux_tx, s_fim_mux_tx,
             s_zera_contador_tx, s_zera_contador_mux_tx,
             s_partida_tx, s_tx_feita
         : std_logic;
-    signal  s_contagem_tx
-        : std_logic_vector (1 downto 0);
     signal  s_contagem_mux_tx
-        : std_logic_vector (2 downto 0);
-    signal  s_saida_mux_cubo, s_saida_mux_x, s_dados_ascii    
+        : std_logic_vector (3 downto 0);
+    signal  s_dados_ascii    
         : std_logic_vector (6 downto 0);
     signal  s_ascii_distancia_x, s_ascii_distancia_cubo
         : std_logic_vector(20 downto 0);
@@ -109,9 +88,7 @@ begin
             partida             => partida,
             tx_feita            => s_tx_feita,
             fim_mux_tx          => s_fim_mux_tx,
-            fim_tx_total        => s_fim_tx_total,
 
-            conta_tx_total      => s_conta_tx_total,
             conta_mux_tx        => s_conta_mux_tx,
             zera_contador_tx    => s_zera_contador_tx,
             partida_tx          => s_partida_tx,
@@ -119,12 +96,12 @@ begin
         );
 
     -- Contadores que controlam os dados a serem transmitidos
-    s_zera_contador_mux_tx    <= s_zera_contador_tx or s_conta_tx_total;
+    s_zera_contador_mux_tx    <= s_zera_contador_tx;
 
     ContadorMuxTx: contador_m
         generic map (
-            M => 8,  
-            N => 3 
+            M => 12,  
+            N => 4 
         )
         port map (
             clock => clock,
@@ -132,20 +109,6 @@ begin
             conta => s_conta_mux_tx,
             Q     => s_contagem_mux_tx,
             fim   => s_fim_mux_tx,
-            meio  => open
-        );
-
-    ContadorTxTotal: contador_m
-        generic map (
-            M => 3,  
-            N => 2 
-        )
-        port map (
-            clock => clock,
-            zera  => s_zera_contador_tx,
-            conta => s_conta_tx_total,
-            Q     => s_contagem_tx,
-            fim   => s_fim_tx_total,
             meio  => open
         );
 
@@ -158,49 +121,25 @@ begin
     s_ascii_distancia_x(13 downto  7) <= "011" & distancia_x( 7 downto 4);
     s_ascii_distancia_x(20 downto 14) <= "011" & distancia_x(11 downto 8);
 
-    -- Multiplexadores para Transmissão Serial
-    MuxTxDistanciaCubo: mux_8x1_n
-        generic map(
-            BITS    => 7 
-        )
-        port map( 
-            D0      => "0110000",   -- angulo do cubo é 0
-            D1      => "0110000",
-            D2      => "0110000",
-            D3      => "0101100",   -- ,
-            D4      => s_ascii_distancia_cubo(20 downto 14),
-            D5      => s_ascii_distancia_cubo(13 downto  7),
-            D6      => s_ascii_distancia_cubo( 6 downto  0),
-            D7      => "0100011",   -- #
-            SEL     => s_contagem_mux_tx,
-            MUX_OUT => s_saida_mux_cubo
-        );
-
-    MuxTxDistanciaX: mux_8x1_n
-        generic map(
-            BITS    => 7 
-        )
-        port map( 
-            D0      => ascii_angulo_servo_x(22 downto 16),
-            D1      => ascii_angulo_servo_x(14 downto  8),
-            D2      => ascii_angulo_servo_x( 6 downto  0),
-            D3      => "0101100",   -- ,
-            D4      => s_ascii_distancia_x(20 downto 14),
-            D5      => s_ascii_distancia_x(13 downto  7),
-            D6      => s_ascii_distancia_x( 6 downto  0),
-            D7      => "0100011",   -- #
-            SEL     => s_contagem_mux_tx,
-            MUX_OUT => s_saida_mux_x
-        );
+    -- Multiplexador para Transmissão Serial
+    -- CCC,AAA;DDD.
+    with s_contagem_mux_tx select
+        s_dados_ascii <=
+            s_ascii_distancia_cubo(20 downto 14)    when "0000",
+            s_ascii_distancia_cubo(13 downto  7)    when "0001",
+            s_ascii_distancia_cubo( 6 downto  0)    when "0010",
+            "0101110"                               when "0011",   -- .
+            ascii_angulo_servo_x(22 downto 16)      when "0100",
+            ascii_angulo_servo_x(14 downto  8)      when "0101",
+            ascii_angulo_servo_x( 6 downto  0)      when "0110",
+            "0101100"                               when "0111",   -- ,
+            s_ascii_distancia_x(20 downto 14)       when "1000",
+            s_ascii_distancia_x(13 downto  7)       when "1001",
+            s_ascii_distancia_x( 6 downto  0)       when "1010",
+            "0111011"                               when "1011",   -- ;
+            "0111111"                               when others;   -- ?
 
     -- Transmissor Serial
-
-    with s_contagem_tx select
-        s_dados_ascii <= 
-            s_saida_mux_cubo    when "00",
-            s_saida_mux_x       when "01",
-			s_saida_mux_cubo    when others;
-
     TransmissorSerial: tx_serial_7E2 
         port map (
             clock         => clock,

@@ -9,9 +9,7 @@ entity componente_de_transmissao_uc is
         partida             : in  std_logic;
         tx_feita            : in  std_logic;
         fim_mux_tx          : in  std_logic;
-        fim_tx_total        : in  std_logic;
 
-        conta_tx_total      : out std_logic;
         conta_mux_tx        : out std_logic;
         zera_contador_tx    : out std_logic;
         partida_tx          : out std_logic;
@@ -23,9 +21,9 @@ end entity;
 architecture fsm_arch of componente_de_transmissao_uc is
 
     type tipo_estado is (
-        inicial, preparacao, 
-        zera_contador_transmissao, inicia_transmissao, aguarda_transmissao, 
-        incrementa_mux_tx, incrementa_contador_tx,
+        inicial, preparacao, zera_contador_transmissao,
+        inicia_transmissao, aguarda_transmissao, 
+        incrementa_mux_tx,
         final
     );
     signal Eatual, Eprox: tipo_estado;
@@ -45,7 +43,7 @@ begin
     end process;
 
     -- logica de proximo estado
-    process (partida, fim_mux_tx, tx_feita, fim_tx_total, Eatual) 
+    process (partida, fim_mux_tx, tx_feita, Eatual) 
 
     begin
 
@@ -63,13 +61,10 @@ begin
             when aguarda_transmissao                =>  
                 if      tx_feita='0'        then        Eprox <= aguarda_transmissao;
                 elsif   fim_mux_tx='0'      then        Eprox <= incrementa_mux_tx;
-                elsif   fim_tx_total='0'    then        Eprox <= incrementa_contador_tx;
                 else                                    Eprox <= final;
                 end if;
 
             when incrementa_mux_tx                  =>  Eprox <= inicia_transmissao;
-
-            when incrementa_contador_tx             =>  Eprox <= inicia_transmissao;
 
             when final                              =>  Eprox <= inicial;
 
@@ -88,9 +83,6 @@ begin
     
     with Eatual select 
         conta_mux_tx        <= '1' when incrementa_mux_tx, '0' when others;
-
-    with Eatual select 
-        conta_tx_total      <= '1' when incrementa_contador_tx, '0' when others;
 
     with Eatual select 
         pronto              <= '1' when final, '0' when others;
