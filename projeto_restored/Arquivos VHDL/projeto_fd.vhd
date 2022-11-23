@@ -283,6 +283,6 @@ begin
     db_distancia_cubo       <= "0000" & s_distancia_BCD_cubo;
     db_distancia_medida_x   <= s_distancia_BCD_x;
     db_angulo_medido_x      <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
-    db_pid                  <= s_pid_BCD(23 downto 16) & s_pid_BCD( 7 downto 0);
+    db_pid                  <= s_pid_BCD( 7 downto 0) & s_pid_BCD(23 downto 16); -- 2 dig de p e 2 dig de d
 
 end arch;

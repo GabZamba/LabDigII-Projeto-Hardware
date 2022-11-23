@@ -352,6 +352,6 @@ begin
 
     -- Saídas
     pronto  <= s_registra_valor_final;
-    pid_BCD <= s_reg_valor_BCD_p(7 downto 0) & s_reg_valor_BCD_i(7 downto 0) & s_reg_valor_BCD_d(7 downto 0);
+    pid_BCD <= s_reg_valor_BCD_d(7 downto 0) & s_reg_valor_BCD_i(7 downto 0) & s_reg_valor_BCD_p(7 downto 0);
 
 end arch;

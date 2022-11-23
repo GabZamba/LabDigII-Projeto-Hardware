@@ -36,6 +36,7 @@ architecture arch of componente_do_servomotor is
     component pid is
         port (
             pulso_calcular      : in  std_logic; -- Periodo de 10 ms
+            reset               : in  std_logic;
             equilibrio          : in  std_logic_vector (9 downto 0);
             distancia_medida    : in  std_logic_vector (9 downto 0); 
             p_externo           : in  std_logic_vector (9 downto 0);
@@ -81,6 +82,7 @@ begin
     CalculoPID: pid 
         port map (
             pulso_calcular      => s_pulso_calcular, -- Periodo de 10 ms
+            reset               => reset,
             equilibrio          => posicao_equilibrio,
             distancia_medida    => distancia_medida, 
             p_externo           => p_externo,

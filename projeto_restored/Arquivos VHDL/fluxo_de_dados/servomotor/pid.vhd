@@ -6,6 +6,7 @@ use ieee.numeric_std.all;
 entity pid is
     port (
         pulso_calcular      : in  std_logic; -- Periodo de 10 ms
+        reset               : in  std_logic;
         equilibrio          : in  std_logic_vector (9 downto 0);
         distancia_medida    : in  std_logic_vector (9 downto 0); 
         p_externo           : in  std_logic_vector (9 downto 0);
@@ -32,33 +33,39 @@ architecture behavioral of pid is
 begin
 
 
-    process(pulso_calcular)
+    process(pulso_calcular, reset)
         variable p, i, d        : integer := 0; 
         variable erro_atual     : integer := 0; 
-        variable saida_atual    : integer := 0;     
+        variable saida_atual    : integer := 512;     
     
     begin    
+        if reset = '1' then 
+            posicao_servo   <= "1000000000";
+            erro_antigo     <= 0;
+            saida_antiga    <= 512;
+        else
     
-        if pulso_calcular='1' then
+            if pulso_calcular='1' then
 
-            erro_acumulado  <= erro_acumulado + erro_antigo;
+                erro_acumulado  <= erro_acumulado + erro_antigo;
 
-            erro_atual      := to_integer(unsigned(equilibrio)) - to_integer(unsigned(distancia_medida));
+                erro_atual      := to_integer(unsigned(equilibrio)) - to_integer(unsigned(distancia_medida));
 
-            db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
+                db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
 
-            p           := to_integer(unsigned(p_externo)) * erro_atual; 
-            i           := to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
-            d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 100; -- dividindo pelo tempo que decorreu entre as amostras
-            saida_atual :=  saida_antiga + (p + i + d) / 100; -- Obtendo os valores reais para Kp Kd e Ki 
+                p           := to_integer(unsigned(p_externo)) * erro_atual; 
+                i           := to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
+                d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 100; -- dividindo pelo tempo que decorreu entre as amostras
+                saida_atual :=  saida_antiga + (p + i + d) / 100; -- Obtendo os valores reais para Kp Kd e Ki 
 
-            if saida_atual >= 1024    then saida_atual := 1023; end if;     
-            if saida_atual < 0        then saida_atual := 0;    end if;
+                if saida_atual >= 1023    then saida_atual := 1023; end if;     
+                if saida_atual < 0        then saida_atual := 0;    end if;
 
-            posicao_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
-            erro_antigo     <= erro_atual;
-            saida_antiga    <= saida_atual;
+                posicao_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
+                erro_antigo     <= erro_atual;
+                saida_antiga    <= saida_atual;
 
+            end if;
         end if;
 
     end process;

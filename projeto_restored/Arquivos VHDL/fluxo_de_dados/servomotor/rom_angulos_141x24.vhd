@@ -181,7 +181,7 @@ architecture rom_arch of rom_angulos_141x24 is
 begin
 
     -- converte os 8 primeiros dígitos (2^8 = 256) para caber de 0 a 140
-    posicao_memoria <= to_integer(unsigned(endereco(9 downto 2))) * 140 / 256;
+    posicao_memoria <= to_integer(unsigned(endereco(9 downto 2))) * 141 / 256;
 
     saida <= tabela_angulos(posicao_memoria);
 
