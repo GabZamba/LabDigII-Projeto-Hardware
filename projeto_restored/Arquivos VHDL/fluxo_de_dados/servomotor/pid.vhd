@@ -28,7 +28,7 @@ architecture behavioral of pid is
 
     signal saida_antiga         : integer := 512; -- servo motor em posição de equílibrio para a bolinha    
     signal erro_antigo          : integer := 0; 
-    signal erro_acumulado       : integer := 0;     
+    signal erro_acumulado       : integer := 0;
     
 begin
 
@@ -37,6 +37,7 @@ begin
         variable p, i, d        : integer := 0; 
         variable erro_atual     : integer := 0; 
         variable saida_atual    : integer := 512;     
+        variable saida_proxima  : integer := 512;     
     
     begin    
         if reset = '1' then 
@@ -49,17 +50,19 @@ begin
 
                 erro_acumulado  <= erro_acumulado + erro_antigo;
 
-                erro_atual      := to_integer(unsigned(equilibrio)) - to_integer(unsigned(distancia_medida));
+                erro_atual      := -to_integer(unsigned(equilibrio)) + to_integer(unsigned(distancia_medida));
 
                 db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
 
                 p           := to_integer(unsigned(p_externo)) * erro_atual; 
                 i           := to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
-                d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 100; -- dividindo pelo tempo que decorreu entre as amostras
-                saida_atual :=  saida_antiga + (p + i + d) / 100; -- Obtendo os valores reais para Kp Kd e Ki 
+                d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 10; -- dividindo pelo tempo que decorreu entre as amostras
+                saida_proxima :=  saida_antiga + (p + i + d) / 10; -- Obtendo os valores reais para Kp Kd e Ki 
 
-                if saida_atual >= 1023    then saida_atual := 1023; end if;     
-                if saida_atual < 0        then saida_atual := 0;    end if;
+                if saida_proxima >= 1023    then saida_proxima := 1023; end if;     
+                if saida_proxima < 0        then saida_proxima := 0;    end if;
+
+                saida_atual := (saida_antiga + saida_proxima)/2;
 
                 posicao_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
                 erro_antigo     <= erro_atual;
