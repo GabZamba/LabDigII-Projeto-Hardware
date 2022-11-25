@@ -10,11 +10,12 @@ entity projeto_fd is
         reset                   : in  std_logic;
         cubo_select             : in  std_logic;
         echo_cubo               : in  std_logic;
-        echo_bola_x             : in  std_logic;
+        echo_x                  : in  std_logic;
         entrada_serial          : in  std_logic;
+        entrada_serial_pid      : in  std_logic;
 
         trigger_cubo            : out std_logic;
-        trigger_bola_x          : out std_logic;
+        trigger_x               : out std_logic;
         fim_medida_cubo         : out std_logic;
         fim_medida_bola_x       : out std_logic;
         pwm_servo_x             : out std_logic;
@@ -186,9 +187,9 @@ begin
         port map(
             clock           => clock,
             reset           => reset,
-            echo            => echo_bola_x,
+            echo            => echo_x,
 
-            trigger             => trigger_bola_x,
+            trigger             => trigger_x,
             fim_medida          => fim_medida_bola_x,
             pronto              => open,
             distancia_int       => s_distancia_int_x,
@@ -260,7 +261,7 @@ begin
         port map (
             clock       => clock,
             reset       => reset,
-            dado_serial => entrada_serial,
+            dado_serial => entrada_serial_pid,
 
             pronto      => open,
             valor_p     => s_valor_p,

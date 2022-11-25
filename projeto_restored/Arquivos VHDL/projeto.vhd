@@ -8,16 +8,18 @@ entity projeto is
         clock               : in  std_logic;
         reset               : in  std_logic;
         echo_cubo           : in  std_logic;
-        echo_bola_x         : in  std_logic;
+        echo_x              : in  std_logic;
         entrada_serial      : in  std_logic;
+        entrada_serial_pid  : in  std_logic;
         cubo_select         : in  std_logic;
         display_select      : in  std_logic_vector(1 downto 0);
 
         trigger_cubo        : out std_logic;
-        trigger_bola_x      : out std_logic;
+        trigger_x           : out std_logic;
         pwm_servo_x         : out std_logic;
         saida_serial        : out std_logic;
 
+        db_cubo_select      : out std_logic;
         db_display_select   : out std_logic_vector(1 downto 0);
         db_7seg_0           : out std_logic_vector(6 downto 0);
         db_7seg_1           : out std_logic_vector(6 downto 0);
@@ -35,11 +37,12 @@ architecture arch of projeto is
             reset                   : in  std_logic;
             cubo_select             : in  std_logic;
             echo_cubo               : in  std_logic;
-            echo_bola_x             : in  std_logic;
+            echo_x                  : in  std_logic;
             entrada_serial          : in  std_logic;
+            entrada_serial_pid      : in  std_logic;
     
             trigger_cubo            : out std_logic;
-            trigger_bola_x          : out std_logic;
+            trigger_x               : out std_logic;
             fim_medida_cubo         : out std_logic;
             fim_medida_bola_x       : out std_logic;
             pwm_servo_x             : out std_logic;
@@ -92,11 +95,12 @@ begin
             reset                   => s_reset,
             cubo_select             => cubo_select,
             echo_cubo               => echo_cubo,
-            echo_bola_x             => echo_bola_x,
+            echo_x                  => echo_x,
             entrada_serial          => entrada_serial,
+            entrada_serial_pid      => entrada_serial_pid,
     
             trigger_cubo            => trigger_cubo,
-            trigger_bola_x          => trigger_bola_x,
+            trigger_x               => trigger_x,
             fim_medida_cubo         => open,
             fim_medida_bola_x       => open,
             pwm_servo_x             => pwm_servo_x,
@@ -148,6 +152,7 @@ begin
 
     -- Depuração
     db_display_select   <= display_select;
+    db_cubo_select      <= cubo_select;
     
 end architecture;
 

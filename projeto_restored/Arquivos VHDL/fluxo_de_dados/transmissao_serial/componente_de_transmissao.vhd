@@ -122,7 +122,7 @@ begin
     s_ascii_distancia_x(20 downto 14) <= "011" & distancia_x(11 downto 8);
 
     -- Multiplexador para Transmissão Serial
-    -- CCC,AAA;DDD.
+    -- CCC.AAA,DDD;
     with s_contagem_mux_tx select
         s_dados_ascii <=
             s_ascii_distancia_cubo(20 downto 14)    when "0000",
