@@ -274,13 +274,13 @@ begin
 
     with cubo_select select
         s_distancia_int_cubo <=
-            s_distancia_int_cubo_real       when '0',
-            s_distancia_int_cubo_virtual    when '1';
+            s_distancia_int_cubo_virtual    when '1',
+            s_distancia_int_cubo_real       when others;
         
     with cubo_select select
         s_distancia_BCD_cubo <=
-            s_distancia_BCD_cubo_real(11 downto 0)      when '0',
-            s_distancia_BCD_cubo_virtual(11 downto 0)   when '1';
+            s_distancia_BCD_cubo_virtual(11 downto 0)   when '1',
+            s_distancia_BCD_cubo_real(11 downto 0)      when others;
 
     -- Depuração
     db_distancia_cubo       <= "0000" & s_distancia_BCD_cubo;
