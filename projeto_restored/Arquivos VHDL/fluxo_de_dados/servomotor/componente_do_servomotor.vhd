@@ -33,7 +33,7 @@ architecture arch of componente_do_servomotor is
         );
     end component;
 
-    component pid_alternativo is
+    component pid is
         port (
             pulso_calcular      : in  std_logic; -- Periodo de 10 ms
             reset               : in  std_logic;
@@ -79,7 +79,7 @@ architecture arch of componente_do_servomotor is
 
 begin
 
-    CalculoPID: pid_alternativo
+    CalculoPID: pid
         port map (
             pulso_calcular      => s_pulso_calcular, -- Periodo de 10 ms
             reset               => reset,
@@ -110,7 +110,7 @@ begin
     -- timer de 100ms entre cada medição do pid
     Timer100ms: contador_m 
         generic map (
-            M => 833_333,  -- 5.000.000 * 20ns = 100ms
+            M => 83_333,  -- 5.000.000 * 20ns = 100ms
             N => 23 
             -- M => 100,  
             -- N => 7 

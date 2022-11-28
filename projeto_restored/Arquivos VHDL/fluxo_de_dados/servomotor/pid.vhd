@@ -20,57 +20,77 @@ end pid;
 
 
 architecture behavioral of pid is
+    type tipo_estado is (
+        estado1, estado2, 
+        estado3, estado4, 
+        estado5, estado6
+    );
+    signal Eatual           : tipo_estado;
 
-    -- Utilizando valores inteiros para as constantes, para se obter o valor real, deve-se dividir por 100 os seus respectivos valores
-    constant Kp                 : integer := 50; 
-    constant Kd                 : integer := 0;
-    constant Ki                 : integer := 0;
+    constant Kp : integer :=  13;
+    constant Ki : integer :=   0;
+    constant Kd : integer := 230;
+    -- outros valores bons: 016,000,390# 017,000,365#
 
-    signal saida_antiga         : integer := 512; -- servo motor em posição de equílibrio para a bolinha    
-    signal erro_antigo          : integer := 0; 
-    signal erro_acumulado       : integer := 0;
+    signal erro_antigo      : integer := 0;
+    signal erro_atual       : integer := 0;
+    signal erro_acumulado   : integer := 0;
+    signal p, i, d          : integer := 0;
+    -- servo motor em posição de equílibrio para o carrinho
+    signal saida_antiga     : integer := 512;
+    signal saida_atual      : integer := 512;
+    signal saida_proxima    : integer := 512;
+    
     
 begin
 
+    process(pulso_calcular) 
+    begin
 
-    process(pulso_calcular, reset)
-        variable p, i, d        : integer := 0; 
-        variable erro_atual     : integer := 0; 
-        variable saida_atual    : integer := 512;     
-        variable saida_proxima  : integer := 512;     
-    
-    begin    
         if reset = '1' then 
-            posicao_servo   <= "1000000000";
             erro_antigo     <= 0;
+            erro_atual      <= 0;
+            erro_acumulado  <= 0;
             saida_antiga    <= 512;
-        else
-    
-            if pulso_calcular='1' then
-
+            saida_atual     <= 512;
+            saida_proxima   <= 512;
+        
+        elsif pulso_calcular'event and pulso_calcular = '1' then
+            if Eatual=estado1 then
                 erro_acumulado  <= erro_acumulado + erro_antigo;
+                erro_atual      <= to_integer(unsigned(distancia_medida)) - to_integer(unsigned(equilibrio));
+                Eatual          <= estado2;
+                
+            elsif Eatual=estado2 then
+                p               <= Kp * erro_atual / 10; 
+                i               <= Ki * (erro_atual + erro_acumulado);
+                d               <= Kd * (erro_atual - erro_antigo);
+                Eatual          <= estado3;
 
-                erro_atual      := -to_integer(unsigned(equilibrio)) + to_integer(unsigned(distancia_medida));
+            elsif Eatual=estado3 then    
+                saida_proxima   <=  saida_antiga + (p + i + d) / 10;
+                Eatual          <= estado4;
 
-                db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
+            elsif Eatual=estado4 then    
+                if saida_proxima >= 1023    then saida_proxima <= 1023; end if;     
+                if saida_proxima < 0        then saida_proxima <= 0;    end if;
+                Eatual          <= estado5;
 
-                p           := to_integer(unsigned(p_externo)) * erro_atual; 
-                i           := to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
-                d           := to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) / 10; -- dividindo pelo tempo que decorreu entre as amostras
-                saida_proxima :=  saida_antiga + (p + i + d) / 10; -- Obtendo os valores reais para Kp Kd e Ki 
+            elsif Eatual=estado5 then    
+                saida_atual     <= (saida_antiga + saida_proxima)/2;
+                Eatual          <= estado6;
 
-                if saida_proxima >= 1023    then saida_proxima := 1023; end if;     
-                if saida_proxima < 0        then saida_proxima := 0;    end if;
-
-                saida_atual := (saida_antiga + saida_proxima)/2;
-
-                posicao_servo <= std_logic_vector(to_unsigned( saida_atual, 10));
+            elsif Eatual=estado6 then    
                 erro_antigo     <= erro_atual;
                 saida_antiga    <= saida_atual;
-
+                Eatual          <= estado1;
             end if;
         end if;
 
     end process;
+
+    -- Saídas
+    posicao_servo   <= std_logic_vector(to_unsigned(saida_atual, 10));
+    db_erro_atual   <= std_logic_vector(to_unsigned( erro_atual, 10));
 
 end behavioral;

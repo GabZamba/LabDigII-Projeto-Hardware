@@ -245,18 +245,19 @@ begin
             pronto                  => open
         );
 
-    -- ReceptorCuboVirtual: receptor_cubo_virtual 
-    --     port map(
-    --         clock           => clock,
-    --         reset           => reset,
-    --         dado_serial     => entrada_serial,
+    ReceptorCuboVirtual: receptor_cubo_virtual 
+        port map(
+            clock           => clock,
+            reset           => reset,
+            dado_serial     => entrada_serial,
 
-    --         distancia_cubo_int  => s_distancia_int_cubo_virtual,
-    --         distancia_cubo_BCD  => s_distancia_BCD_cubo_virtual,
-    --         pronto              => open
-    --     );
-    s_distancia_int_cubo_virtual <= "0100101100";
-    s_distancia_BCD_cubo_virtual <= "0000001100000000";
+            distancia_cubo_int  => s_distancia_int_cubo_virtual,
+            distancia_cubo_BCD  => s_distancia_BCD_cubo_virtual,
+            pronto              => open
+        );
+    -- s_distancia_int_cubo_virtual <= std_logic_vector(to_unsigned(250, 10));
+    -- s_distancia_BCD_cubo_virtual <= "0000 0010 0101 0000"; --300
+    -- s_distancia_BCD_cubo_virtual <= "0000001100000000"; --250
 
         
     ReceptorPID: receptor_serial_pid
