@@ -110,7 +110,7 @@ begin
     -- timer de 100ms entre cada medição do pid
     Timer100ms: contador_m 
         generic map (
-            M => 83_333,  -- 5.000.000 * 20ns = 100ms
+            M => 40_000,  -- 5.000.000 * 20ns = 100ms
             N => 23 
             -- M => 100,  
             -- N => 7 

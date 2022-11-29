@@ -27,9 +27,9 @@ architecture behavioral of pid is
     );
     signal Eatual           : tipo_estado;
 
-    constant Kp : integer :=  13;
+    constant Kp : integer :=   6;
     constant Ki : integer :=   0;
-    constant Kd : integer := 230;
+    constant Kd : integer := 140;
     -- outros valores bons: 016,000,390# 017,000,365#
 
     signal erro_antigo      : integer := 0;
@@ -58,13 +58,16 @@ begin
         elsif pulso_calcular'event and pulso_calcular = '1' then
             if Eatual=estado1 then
                 erro_acumulado  <= erro_acumulado + erro_antigo;
-                erro_atual      <= to_integer(unsigned(distancia_medida)) - to_integer(unsigned(equilibrio));
+                erro_atual      <= to_integer(unsigned(distancia_medida)) - 20 - to_integer(unsigned(equilibrio));
                 Eatual          <= estado2;
                 
             elsif Eatual=estado2 then
+                -- p               <= to_integer(unsigned(p_externo)) * erro_atual / 10; 
+                -- i               <= to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
+                -- d               <= to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) * 2;
                 p               <= Kp * erro_atual / 10; 
                 i               <= Ki * (erro_atual + erro_acumulado);
-                d               <= Kd * (erro_atual - erro_antigo);
+                d               <= Kd * (erro_atual - erro_antigo) * 2;
                 Eatual          <= estado3;
 
             elsif Eatual=estado3 then    
