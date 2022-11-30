@@ -27,9 +27,9 @@ architecture behavioral of pid is
     );
     signal Eatual           : tipo_estado;
 
-    constant Kp : integer :=   6;
+    constant Kp : integer :=   5; --6
     constant Ki : integer :=   0;
-    constant Kd : integer := 140;
+    constant Kd : integer := 110; --140
     -- outros valores bons: 016,000,390# 017,000,365#
 
     signal erro_antigo      : integer := 0;
@@ -54,6 +54,7 @@ begin
             saida_antiga    <= 512;
             saida_atual     <= 512;
             saida_proxima   <= 512;
+            Eatual          <= estado1;
         
         elsif pulso_calcular'event and pulso_calcular = '1' then
             if Eatual=estado1 then
@@ -62,12 +63,12 @@ begin
                 Eatual          <= estado2;
                 
             elsif Eatual=estado2 then
-                -- p               <= to_integer(unsigned(p_externo)) * erro_atual / 10; 
-                -- i               <= to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
-                -- d               <= to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) * 2;
-                p               <= Kp * erro_atual / 10; 
-                i               <= Ki * (erro_atual + erro_acumulado);
-                d               <= Kd * (erro_atual - erro_antigo) * 2;
+                p               <= to_integer(unsigned(p_externo)) * erro_atual / 10; 
+                i               <= to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
+                d               <= to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) * 2;
+                -- p               <= Kp * erro_atual / 10; 
+                -- i               <= Ki * (erro_atual + erro_acumulado);
+                -- d               <= Kd * (erro_atual - erro_antigo) * 2;
                 Eatual          <= estado3;
 
             elsif Eatual=estado3 then    
