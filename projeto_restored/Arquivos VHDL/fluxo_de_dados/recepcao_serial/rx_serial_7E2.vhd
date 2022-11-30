@@ -127,8 +127,10 @@ begin
     -- gerador de pulso de tick
     ContadorTick: contador_m
         generic map (
-            M => 434, -- 115.200 bauds (50M/115.200)
-            N => 9
+            -- M => 434, -- 115.200 bauds (50M/115.200)
+            -- N => 9
+            M => 5208, -- 9.600 bauds (50M/9.600)
+            N => 13    -- Log2 (5208)
         )
         port map (
             clock => clock,
