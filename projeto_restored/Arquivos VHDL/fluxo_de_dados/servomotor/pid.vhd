@@ -54,7 +54,6 @@ begin
             saida_antiga    <= 512;
             saida_atual     <= 512;
             saida_proxima   <= 512;
-            Eatual          <= estado1;
         
         elsif pulso_calcular'event and pulso_calcular = '1' then
             if Eatual=estado1 then
@@ -63,12 +62,12 @@ begin
                 Eatual          <= estado2;
                 
             elsif Eatual=estado2 then
-                p               <= to_integer(unsigned(p_externo)) * erro_atual / 10; 
-                i               <= to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
-                d               <= to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) * 2;
-                -- p               <= Kp * erro_atual / 10; 
-                -- i               <= Ki * (erro_atual + erro_acumulado);
-                -- d               <= Kd * (erro_atual - erro_antigo) * 2;
+                -- p               <= to_integer(unsigned(p_externo)) * erro_atual / 10; 
+                -- i               <= to_integer(unsigned(i_externo)) * (erro_atual + erro_acumulado);
+                -- d               <= to_integer(unsigned(d_externo)) * (erro_atual - erro_antigo) * 2;
+                p               <= Kp * erro_atual / 10; 
+                i               <= Ki * (erro_atual + erro_acumulado);
+                d               <= Kd * (erro_atual - erro_antigo) * 2;
                 Eatual          <= estado3;
 
             elsif Eatual=estado3 then    
