@@ -123,6 +123,7 @@ begin
 
     -- Multiplexador para Transmissão Serial
     -- CCC.AAA,DDD;
+    
     with s_contagem_mux_tx select
         s_dados_ascii <=
             s_ascii_distancia_cubo(20 downto 14)    when "0000",
