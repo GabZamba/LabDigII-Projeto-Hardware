@@ -6,17 +6,17 @@ use ieee.math_real.all;
 
 entity componente_do_servomotor is
     port (
-        clock                   : in  std_logic;
-        reset                   : in  std_logic;
-        posicao_equilibrio      : in  std_logic_vector (9 downto 0);
-        distancia_medida        : in  std_logic_vector (9 downto 0);
-        p_externo               : in  std_logic_vector (9 downto 0);
-        i_externo               : in  std_logic_vector (9 downto 0);
-        d_externo               : in  std_logic_vector (9 downto 0);
+        clock               : in  std_logic;
+        reset               : in  std_logic;
+        posicao_equilibrio  : in  std_logic_vector (9 downto 0);
+        distancia_medida    : in  std_logic_vector (9 downto 0);
+        p_externo           : in  std_logic_vector (9 downto 0);
+        i_externo           : in  std_logic_vector (9 downto 0);
+        d_externo           : in  std_logic_vector (9 downto 0);
 
-        pwm_servo               : out std_logic;
-        angulo_medido           : out std_logic_vector(23 downto 0);
-        db_erro_atual           : out std_logic_vector (9 downto 0)
+        pwm_servo       : out std_logic;
+        angulo_medido   : out std_logic_vector(23 downto 0);
+        db_erro_atual   : out std_logic_vector (9 downto 0)
     );
 end entity;
 
@@ -26,10 +26,10 @@ architecture arch of componente_do_servomotor is
 
     component controle_servo is
         port (
-            clock             : in  std_logic;
-            reset             : in  std_logic;
-            posicao_servo     : in  std_logic_vector (9 downto 0);
-            controle          : out std_logic
+            clock           : in  std_logic;
+            reset           : in  std_logic;
+            posicao_servo   : in  std_logic_vector (9 downto 0);
+            controle        : out std_logic
         );
     end component;
 
@@ -43,8 +43,8 @@ architecture arch of componente_do_servomotor is
             i_externo           : in  std_logic_vector (9 downto 0);
             d_externo           : in  std_logic_vector (9 downto 0);
             
-            posicao_servo       : out std_logic_vector (9 downto 0);
-            db_erro_atual       : out std_logic_vector (9 downto 0)
+            posicao_servo   : out std_logic_vector (9 downto 0);
+            db_erro_atual   : out std_logic_vector (9 downto 0)
         );
     end component;
 
@@ -89,16 +89,16 @@ begin
             i_externo           => i_externo,
             d_externo           => d_externo,
             
-            posicao_servo       => s_posicao_servo,
-            db_erro_atual       => db_erro_atual
+            posicao_servo   => s_posicao_servo,
+            db_erro_atual   => db_erro_atual
         );
     
     ControleServo: controle_servo 
         port map(
-            clock             => clock,
-            reset             => reset,
-            posicao_servo     => s_posicao_servo,
-            controle          => pwm_servo
+            clock           => clock,
+            reset           => reset,
+            posicao_servo   => s_posicao_servo,
+            controle        => pwm_servo
         );
 
     RomAngulos: rom_angulos_141x24
@@ -107,12 +107,12 @@ begin
             saida    => angulo_medido
         );
 
-    -- timer de 100ms entre cada medição do pid
-    Timer100ms: contador_m 
+    -- timer de 800us entre cada medição do pid
+    Timer800us: contador_m 
         generic map (
-            M => 40_000,  -- 5.000.000 * 20ns = 100ms
+            M => 40_000,  -- 40.000 * 20ns = 800us
             N => 23 
-            -- M => 100,  
+            -- M => 100,  -- para testbench
             -- N => 7 
         )
         port map (

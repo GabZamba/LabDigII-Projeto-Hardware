@@ -33,13 +33,13 @@ architecture arch of projeto is
 
     component projeto_fd is
         port (
-            clock                   : in  std_logic;
-            reset                   : in  std_logic;
-            cubo_select             : in  std_logic;
-            echo_cubo               : in  std_logic;
-            echo_x                  : in  std_logic;
-            entrada_serial          : in  std_logic;
-            entrada_serial_pid      : in  std_logic;
+            clock               : in  std_logic;
+            reset               : in  std_logic;
+            cubo_select         : in  std_logic;
+            echo_cubo           : in  std_logic;
+            echo_x              : in  std_logic;
+            entrada_serial      : in  std_logic;
+            entrada_serial_pid  : in  std_logic;
     
             trigger_cubo            : out std_logic;
             trigger_x               : out std_logic;
@@ -91,13 +91,13 @@ begin
 
     FD: projeto_fd 
 		port map (
-            clock                   => clock,
-            reset                   => s_reset,
-            cubo_select             => cubo_select,
-            echo_cubo               => echo_cubo,
-            echo_x                  => echo_x,
-            entrada_serial          => entrada_serial,
-            entrada_serial_pid      => entrada_serial_pid,
+            clock               => clock,
+            reset               => s_reset,
+            cubo_select         => cubo_select,
+            echo_cubo           => echo_cubo,
+            echo_x              => echo_x,
+            entrada_serial      => entrada_serial,
+            entrada_serial_pid  => entrada_serial_pid,
     
             trigger_cubo            => trigger_cubo,
             trigger_x               => trigger_x,

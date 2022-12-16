@@ -44,7 +44,7 @@ architecture behavioral of pid is
     
 begin
 
-    process(pulso_calcular) 
+    process(pulso_calcular, reset) 
     begin
 
         if reset = '1' then 

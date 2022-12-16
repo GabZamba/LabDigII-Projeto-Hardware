@@ -91,8 +91,8 @@ begin
     ContadorDistancia: contador_mm
         generic map (
             -- R   => 2941,    -- 2941 * 20ns = 58,82 us, equivalente a 1cm
-            R   => 294,     -- 294 * 20ns = 5,80 us, equivalente a 1mm 
             -- N   => 12       -- 2^12 (4096) para caber 2941
+            R   => 294,     -- 294 * 20ns = 5,80 us, equivalente a 1mm
             N   => 9        -- 2^9 (512) para caber 294
         )
         port map (

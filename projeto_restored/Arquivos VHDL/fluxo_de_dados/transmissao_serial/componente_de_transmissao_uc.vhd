@@ -4,11 +4,11 @@ use ieee.std_logic_1164.all;
 
 entity componente_de_transmissao_uc is 
     port ( 
-        clock               : in  std_logic;
-        reset               : in  std_logic;
-        partida             : in  std_logic;
-        tx_feita            : in  std_logic;
-        fim_mux_tx          : in  std_logic;
+        clock       : in  std_logic;
+        reset       : in  std_logic;
+        partida     : in  std_logic;
+        tx_feita    : in  std_logic;
+        fim_mux_tx  : in  std_logic;
 
         conta_mux_tx        : out std_logic;
         zera_contador_tx    : out std_logic;

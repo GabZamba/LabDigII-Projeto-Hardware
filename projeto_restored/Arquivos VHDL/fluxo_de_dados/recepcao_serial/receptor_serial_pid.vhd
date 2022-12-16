@@ -10,11 +10,11 @@ entity receptor_serial_pid is
         reset       : in  std_logic;
         dado_serial : in  std_logic;
 
-        pronto      : out std_logic;
-        valor_p     : out std_logic_vector( 9 downto 0);
-        valor_i     : out std_logic_vector( 9 downto 0);
-        valor_d     : out std_logic_vector( 9 downto 0);
-        pid_BCD     : out std_logic_vector(23 downto 0)
+        pronto  : out std_logic;
+        valor_p : out std_logic_vector( 9 downto 0);
+        valor_i : out std_logic_vector( 9 downto 0);
+        valor_d : out std_logic_vector( 9 downto 0);
+        pid_BCD : out std_logic_vector(23 downto 0)
     );
 end entity;
 
@@ -23,9 +23,9 @@ architecture arch of receptor_serial_pid is
 
     component rx_serial_7E2 is
         port (
-            clock               : in std_logic;
-            reset               : in std_logic;
-            dado_serial         : in std_logic;
+            clock       : in std_logic;
+            reset       : in std_logic;
+            dado_serial : in std_logic;
 
             dados_ascii         : out std_logic_vector(6 downto 0);
             paridade_recebida   : out std_logic;
@@ -95,9 +95,9 @@ begin
     -- formato do valor: PPP,III,DDD#
     ReceptorSerial: rx_serial_7E2
         port map (
-            clock               => clock,
-            reset               => reset,
-            dado_serial         => dado_serial,
+            clock       => clock,
+            reset       => reset,
+            dado_serial => dado_serial,
     
             dados_ascii         => s_dado_ascii,
             paridade_recebida   => open,

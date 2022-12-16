@@ -4,10 +4,10 @@ use ieee.numeric_std.all;
 
 entity interface_hcsr04 is
     port (
-        clock       : in std_logic;
-        reset       : in std_logic;
-        medir       : in std_logic;
-        echo        : in std_logic;
+        clock   : in std_logic;
+        reset   : in std_logic;
+        medir   : in std_logic;
+        echo    : in std_logic;
 
         trigger     : out std_logic;
         medida      : out std_logic_vector(15 downto 0); -- 4 digitos BCD

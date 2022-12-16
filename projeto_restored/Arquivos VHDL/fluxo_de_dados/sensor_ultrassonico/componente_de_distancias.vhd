@@ -24,10 +24,10 @@ architecture arch of componente_de_distancias is
 
     component interface_hcsr04 is
         port (
-            clock       : in std_logic;
-            reset       : in std_logic;
-            medir       : in std_logic;
-            echo        : in std_logic;
+            clock   : in std_logic;
+            reset   : in std_logic;
+            medir   : in std_logic;
+            echo    : in std_logic;
     
             trigger     : out std_logic;
             medida      : out std_logic_vector(15 downto 0); 
@@ -38,20 +38,19 @@ architecture arch of componente_de_distancias is
 
     component componente_de_distancias_uc is 
         port (
-            clock                   : in  std_logic;
-            reset                   : in  std_logic;
-            echo                    : in  std_logic;
-            fim_medida              : in  std_logic;
-            fim_contador_medida     : in  std_logic;
-            fim_timer_1ms           : in  std_logic;
-            fim_timer_distMax       : in  std_logic;
+            clock               : in  std_logic;
+            reset               : in  std_logic;
+            fim_medida          : in  std_logic;
+            fim_contador_medida : in  std_logic;
+            fim_timer_20ms      : in  std_logic;
+            fim_timer_distMax   : in  std_logic;
     
             zera                : out std_logic;
             zera_timer_distMax  : out std_logic;
             pulso_medir         : out std_logic;
             registra_medida     : out std_logic;
             registra_final      : out std_logic;
-            conta_1ms           : out std_logic;
+            conta_20ms          : out std_logic;
             conta_medida        : out std_logic;
             pronto              : out std_logic
         );
@@ -90,10 +89,10 @@ architecture arch of componente_de_distancias is
             constant DistMax_mm : integer := 500  
         );
         port (
-            dist1           : in  std_logic_vector (15 downto 0);
-            dist2           : in  std_logic_vector (15 downto 0);
-            dist3           : in  std_logic_vector (15 downto 0);
-            dist4           : in  std_logic_vector (15 downto 0);
+            dist1   : in  std_logic_vector (15 downto 0);
+            dist2   : in  std_logic_vector (15 downto 0);
+            dist3   : in  std_logic_vector (15 downto 0);
+            dist4   : in  std_logic_vector (15 downto 0);
     
             resultadoInt    : out std_logic_vector ( 9 downto 0);
             resultadoBCD    : out std_logic_vector (15 downto 0)
@@ -104,8 +103,8 @@ architecture arch of componente_de_distancias is
     signal  s_reset, s_zera, s_reset_sensor, s_zera_timer_distMax,      -- sinais de reset
             s_registra_medida, s_registra_final,   -- sinais de registro
             s_registra_1, s_registra_2, s_registra_3, s_registra_4,
-            s_pulso_medir, s_conta_medida, s_conta_1ms,                 -- sinais de 
-            s_fim_medida, s_fim_timer_1ms, s_fim_timer_distMax, s_fim_contador_medida, s_fim   -- sinais de fim
+            s_pulso_medir, s_conta_medida, s_conta_20ms,                 -- sinais de 
+            s_fim_medida, s_fim_timer_20ms, s_fim_timer_distMax, s_fim_contador_medida, s_fim   -- sinais de fim
         : std_logic := '0';
     signal  s_contagem_atual 
         : std_logic_vector (1 downto 0);
@@ -124,53 +123,48 @@ begin
     -- Sensor Ultrassônico de Distância
     SensorUltrassonico: interface_hcsr04
         port map(
-            clock           => clock,
-            reset           => s_reset_sensor,
-            medir           => s_pulso_medir,   -- sempre realizará a medição 1ms após a prévia
-            echo            => echo,
-            trigger         => trigger,
-            medida          => s_distancia_medida,
-            pronto          => s_fim_medida,        -- pulso que indica o término
-            db_estado       => open
+            clock       => clock,
+            reset       => s_reset_sensor,
+            medir       => s_pulso_medir,   -- sempre realizará a medição 20ms após a prévia
+            echo        => echo,
+            trigger     => trigger,
+            medida      => s_distancia_medida,
+            pronto      => s_fim_medida,        -- pulso que indica o término
+            db_estado   => open
         );
 
     -- Unidade de Controle
     UC: componente_de_distancias_uc
         port map (
-            clock                   => clock,
-            reset                   => reset,
-            echo                    => echo,
-            fim_medida              => s_fim_medida,
-            fim_contador_medida     => s_fim_contador_medida,
-            fim_timer_1ms           => s_fim_timer_1ms,
-            fim_timer_distMax       => s_fim_timer_distMax,
+            clock               => clock,
+            reset               => reset,
+            fim_medida          => s_fim_medida,
+            fim_contador_medida => s_fim_contador_medida,
+            fim_timer_20ms      => s_fim_timer_20ms,
+            fim_timer_distMax   => s_fim_timer_distMax,
 
             zera                => s_zera,
             zera_timer_distMax  => s_zera_timer_distMax,
             pulso_medir         => s_pulso_medir,
             registra_medida     => s_registra_medida,
             registra_final      => s_registra_final,
-            conta_1ms           => s_conta_1ms,
+            conta_20ms          => s_conta_20ms,
             conta_medida        => s_conta_medida,
             pronto              => pronto
         );
 
     -- timer usado para dar um intervalo entre cada realização de medida de distância
     TimerEntreMedidas: contador_m 
-        generic map (  
-            -- M => 100_000,  -- 100.000 * 20ns = 2ms
-            -- N => 17
+        generic map (
             M => 1_000_000,  -- 1.000.000 * 20ns = 20ms
             N => 20
-            -- M => 10_000_000,  -- 10.000.000 * 20ns = 200ms
-            -- N => 24
         )
         port map (
             clock => clock,
             zera  => s_fim_medida,
-            conta => s_conta_1ms,
+            conta => s_conta_20ms,
             Q     => open,
-            fim   => s_fim_timer_1ms,
+            fim   => s_fim_timer_20ms,
             meio  => open
         );
 
@@ -265,10 +259,10 @@ begin
             DistMax_mm => 4000  -- para Modelsim (4m)
         )
         port map (
-            dist1           => s_dist1,
-            dist2           => s_dist2,
-            dist3           => s_dist3,
-            dist4           => s_dist4,
+            dist1   => s_dist1,
+            dist2   => s_dist2,
+            dist3   => s_dist3,
+            dist4   => s_dist4,
 
             resultadoInt    => s_distancia_aproximada_int,
             resultadoBCD    => s_distancia_aproximada_BCD

@@ -13,8 +13,8 @@ entity componente_de_transmissao is
         distancia_x             : in  std_logic_vector(11 downto 0);
         ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
 
-        saida_serial            : out std_logic;
-        pronto                  : out std_logic
+        saida_serial    : out std_logic;
+        pronto          : out std_logic
 
     );
 end entity;
@@ -37,11 +37,11 @@ architecture arch of componente_de_transmissao is
 
     component componente_de_transmissao_uc is 
         port ( 
-            clock               : in  std_logic;
-            reset               : in  std_logic;
-            partida             : in  std_logic;
-            tx_feita            : in  std_logic;
-            fim_mux_tx          : in  std_logic;
+            clock       : in  std_logic;
+            reset       : in  std_logic;
+            partida     : in  std_logic;
+            tx_feita    : in  std_logic;
+            fim_mux_tx  : in  std_logic;
     
             conta_mux_tx        : out std_logic;
             zera_contador_tx    : out std_logic;
@@ -83,11 +83,11 @@ begin
     -- Unidade de Controle
     UC: componente_de_transmissao_uc
         port map ( 
-            clock               => clock,
-            reset               => reset,
-            partida             => partida,
-            tx_feita            => s_tx_feita,
-            fim_mux_tx          => s_fim_mux_tx,
+            clock       => clock,
+            reset       => reset,
+            partida     => partida,
+            tx_feita    => s_tx_feita,
+            fim_mux_tx  => s_fim_mux_tx,
 
             conta_mux_tx        => s_conta_mux_tx,
             zera_contador_tx    => s_zera_contador_tx,

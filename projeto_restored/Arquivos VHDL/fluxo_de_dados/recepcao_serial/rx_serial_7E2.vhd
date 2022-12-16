@@ -5,9 +5,9 @@ use ieee.numeric_std.all;
 
 entity rx_serial_7E2 is
     port (
-        clock               : in std_logic;
-        reset               : in std_logic;
-        dado_serial         : in std_logic;
+        clock       : in std_logic;
+        reset       : in std_logic;
+        dado_serial : in std_logic;
 
         dados_ascii         : out std_logic_vector(6 downto 0);
         paridade_recebida   : out std_logic;
@@ -41,14 +41,14 @@ architecture rx_serial_7E2_arch of rx_serial_7E2 is
 
     component rx_serial_7E2_fd is
         port (
-            clock               : in  std_logic;
-            reset               : in  std_logic;
-            zera                : in  std_logic;
-            conta_rx            : in  std_logic;
-            registra            : in  std_logic;
-            desloca             : in  std_logic;
-            dado_serial         : in  std_logic;
-            tem_dado            : in  std_logic;
+            clock       : in  std_logic;
+            reset       : in  std_logic;
+            zera        : in  std_logic;
+            conta_rx    : in  std_logic;
+            registra    : in  std_logic;
+            desloca     : in  std_logic;
+            dado_serial : in  std_logic;
+            tem_dado    : in  std_logic;
     
             fim_rx              : out std_logic;
             paridade_recebida   : out std_logic;
@@ -109,14 +109,14 @@ begin
     FD: rx_serial_7E2_fd 
 		port map (
 			-- entradas
-            clock               => clock, 
-            reset               => reset,
-			zera                => s_zera, 
-			conta_rx            => s_conta_rx, 
-			registra            => s_registra, 
-			desloca             => s_desloca, 
-			dado_serial         => dado_serial,
-            tem_dado            => s_tem_dado,
+            clock       => clock, 
+            reset       => reset,
+			zera        => s_zera, 
+			conta_rx    => s_conta_rx, 
+			registra    => s_registra, 
+			desloca     => s_desloca, 
+			dado_serial => dado_serial,
+            tem_dado    => s_tem_dado,
             -- saidas
             fim_rx              => s_fim_rx,
             paridade_recebida   => paridade_recebida,

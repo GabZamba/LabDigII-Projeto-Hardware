@@ -5,13 +5,13 @@ use ieee.numeric_std.all;
 
 entity tx_serial_7E2_fd is
     port (
-        clock        	: in  std_logic;
-        reset        	: in  std_logic;
-        zera         	: in  std_logic;
-        conta        	: in  std_logic;
-        carrega      	: in  std_logic;
-        desloca      	: in  std_logic;
-        dados_ascii		: in  std_logic_vector (6 downto 0);
+        clock       : in  std_logic;
+        reset       : in  std_logic;
+        zera        : in  std_logic;
+        conta       : in  std_logic;
+        carrega     : in  std_logic;
+        desloca     : in  std_logic;
+        dados_ascii : in  std_logic_vector (6 downto 0);
 		
         contador_bits	: out std_logic_vector (3 downto 0);
         saida_serial 	: out std_logic;
@@ -58,10 +58,11 @@ architecture tx_serial_7E2_fd_arch of tx_serial_7E2_fd is
 
 begin
 
-	s_paridade <= 	dados_ascii(0) xor dados_ascii(1) xor
-					dados_ascii(2) xor dados_ascii(3) xor
-					dados_ascii(4) xor dados_ascii(5) xor
-					dados_ascii(6);
+	s_paridade <= 	
+        dados_ascii(0) xor dados_ascii(1) xor
+		dados_ascii(2) xor dados_ascii(3) xor
+		dados_ascii(4) xor dados_ascii(5) xor
+		dados_ascii(6);
 
     -- vetor de dados a ser carregado
     s_dados(0)            	<= '1';         -- repouso

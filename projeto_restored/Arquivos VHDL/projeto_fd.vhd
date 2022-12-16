@@ -6,13 +6,13 @@ use ieee.math_real.all;
 
 entity projeto_fd is
     port (
-        clock                   : in  std_logic;
-        reset                   : in  std_logic;
-        cubo_select             : in  std_logic;
-        echo_cubo               : in  std_logic;
-        echo_x                  : in  std_logic;
-        entrada_serial          : in  std_logic;
-        entrada_serial_pid      : in  std_logic;
+        clock               : in  std_logic;
+        reset               : in  std_logic;
+        cubo_select         : in  std_logic;
+        echo_cubo           : in  std_logic;
+        echo_x              : in  std_logic;
+        entrada_serial      : in  std_logic;
+        entrada_serial_pid  : in  std_logic;
 
         trigger_cubo            : out std_logic;
         trigger_x               : out std_logic;
@@ -48,17 +48,17 @@ architecture arch of projeto_fd is
 
     component componente_do_servomotor is
         port (
-            clock                   : in  std_logic;
-            reset                   : in  std_logic;
-            posicao_equilibrio      : in  std_logic_vector (9 downto 0);
-            distancia_medida        : in  std_logic_vector (9 downto 0);
-            p_externo               : in  std_logic_vector (9 downto 0);
-            i_externo               : in  std_logic_vector (9 downto 0);
-            d_externo               : in  std_logic_vector (9 downto 0);
+            clock               : in  std_logic;
+            reset               : in  std_logic;
+            posicao_equilibrio  : in  std_logic_vector (9 downto 0);
+            distancia_medida    : in  std_logic_vector (9 downto 0);
+            p_externo           : in  std_logic_vector (9 downto 0);
+            i_externo           : in  std_logic_vector (9 downto 0);
+            d_externo           : in  std_logic_vector (9 downto 0);
     
-            pwm_servo               : out std_logic;
-            angulo_medido           : out std_logic_vector(23 downto 0);
-            db_erro_atual           : out std_logic_vector (9 downto 0)
+            pwm_servo       : out std_logic;
+            angulo_medido   : out std_logic_vector(23 downto 0);
+            db_erro_atual   : out std_logic_vector (9 downto 0)
         );
     end component;
 
@@ -81,11 +81,11 @@ architecture arch of projeto_fd is
             reset       : in  std_logic;
             dado_serial : in  std_logic;
 
-            pronto      : out std_logic;
-            valor_p     : out std_logic_vector( 9 downto 0);
-            valor_i     : out std_logic_vector( 9 downto 0);
-            valor_d     : out std_logic_vector( 9 downto 0);
-            pid_BCD     : out std_logic_vector(23 downto 0)
+            pronto  : out std_logic;
+            valor_p : out std_logic_vector( 9 downto 0);
+            valor_i : out std_logic_vector( 9 downto 0);
+            valor_d : out std_logic_vector( 9 downto 0);
+            pid_BCD : out std_logic_vector(23 downto 0)
         );
     end component;
 
@@ -122,8 +122,8 @@ architecture arch of projeto_fd is
             clock                   : in  std_logic;
             reset                   : in  std_logic;
             partida                 : in  std_logic;
-            distancia_cubo    : in  std_logic_vector(11 downto 0);
-            distancia_x       : in  std_logic_vector(11 downto 0);
+            distancia_cubo          : in  std_logic_vector(11 downto 0);
+            distancia_x             : in  std_logic_vector(11 downto 0);
             ascii_angulo_servo_x    : in  std_logic_vector(23 downto 0);
 
             saida_serial            : out std_logic;
@@ -153,9 +153,9 @@ begin
 
     MedidorDistanciaCubo: componente_de_distancias 
         port map (
-            clock           => clock,
-            reset           => reset,
-            echo            => echo_cubo,
+            clock   => clock,
+            reset   => reset,
+            echo    => echo_cubo,
     
             trigger             => trigger_cubo,
             fim_medida          => open,
@@ -167,9 +167,9 @@ begin
 
     MedidorDistanciaX: componente_de_distancias 
         port map(
-            clock           => clock,
-            reset           => reset,
-            echo            => echo_x,
+            clock   => clock,
+            reset   => reset,
+            echo    => echo_x,
 
             trigger             => trigger_x,
             fim_medida          => fim_medida_bola_x,
@@ -183,17 +183,17 @@ begin
 
     ServomotorX: componente_do_servomotor 
         port map (
-            clock                   => clock,
-            reset                   => reset,
-            posicao_equilibrio      => s_distancia_int_cubo,
-            distancia_medida        => s_distancia_int_x,
-            p_externo               => s_valor_p,
-            i_externo               => s_valor_i,
-            d_externo               => s_valor_d,
+            clock               => clock,
+            reset               => reset,
+            posicao_equilibrio  => s_distancia_int_cubo,
+            distancia_medida    => s_distancia_int_x,
+            p_externo           => s_valor_p,
+            i_externo           => s_valor_i,
+            d_externo           => s_valor_d,
     
-            pwm_servo               => pwm_servo_x,
-            angulo_medido           => s_ascii_angulo_servo_x,
-            db_erro_atual           => open
+            pwm_servo       => pwm_servo_x,
+            angulo_medido   => s_ascii_angulo_servo_x,
+            db_erro_atual   => open
         );
 
     -- timer de 100ms entre cada transmissão
@@ -201,7 +201,7 @@ begin
         generic map (
             M => 5_000_000, -- 5.000.000 * 20ns = 100ms
             N => 23
-            -- M => 100,
+            -- M => 100, -- para testbench
             -- N => 7
         )
         port map (
@@ -223,8 +223,8 @@ begin
             distancia_x             => s_distancia_BCD_x(11 downto 0),
             ascii_angulo_servo_x    => s_ascii_angulo_servo_x,
 
-            saida_serial            => saida_serial,
-            pronto                  => open
+            saida_serial    => saida_serial,
+            pronto          => open
         );
 
     ReceptorCuboVirtual: receptor_cubo_virtual 
@@ -244,11 +244,11 @@ begin
             reset       => reset,
             dado_serial => entrada_serial_pid,
 
-            pronto      => open,
-            valor_p     => s_valor_p,
-            valor_i     => s_valor_i,
-            valor_d     => s_valor_d,
-            pid_BCD     => s_pid_BCD
+            pronto  => open,
+            valor_p => s_valor_p,
+            valor_i => s_valor_i,
+            valor_d => s_valor_d,
+            pid_BCD => s_pid_BCD
         );
 
     with cubo_select select
@@ -265,6 +265,6 @@ begin
     db_distancia_cubo       <= "0000" & s_distancia_BCD_cubo;
     db_distancia_medida_x   <= s_distancia_BCD_x;
     db_angulo_medido_x      <= s_ascii_angulo_servo_x(19 downto 16) & s_ascii_angulo_servo_x(11 downto 8) & s_ascii_angulo_servo_x(3 downto 0);
-    db_pid                  <= s_pid_BCD( 7 downto 0) & s_pid_BCD(23 downto 16); -- 2 dig de p e 2 dig de d
+    db_pid                  <= s_pid_BCD( 7 downto 0) & s_pid_BCD(23 downto 16); -- 2 digitos de p e 2 digitos de d
 
 end arch;

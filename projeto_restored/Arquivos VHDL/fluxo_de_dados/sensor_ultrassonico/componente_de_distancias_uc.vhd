@@ -4,20 +4,19 @@ use ieee.std_logic_1164.all;
 
 entity componente_de_distancias_uc is 
     port (
-        clock                   : in  std_logic;
-        reset                   : in  std_logic;
-        echo                    : in  std_logic;
-        fim_medida              : in  std_logic;
-        fim_contador_medida     : in  std_logic;
-        fim_timer_1ms           : in  std_logic;
-        fim_timer_distMax       : in  std_logic;
+        clock               : in  std_logic;
+        reset               : in  std_logic;
+        fim_medida          : in  std_logic;
+        fim_contador_medida : in  std_logic;
+        fim_timer_20ms      : in  std_logic;
+        fim_timer_distMax   : in  std_logic;
 
         zera                : out std_logic;
         zera_timer_distMax  : out std_logic;
         pulso_medir         : out std_logic;
         registra_medida     : out std_logic;
         registra_final      : out std_logic;
-        conta_1ms           : out std_logic;
+        conta_20ms          : out std_logic;
         conta_medida        : out std_logic;
         pronto              : out std_logic
     );
@@ -29,11 +28,9 @@ architecture fsm_arch of componente_de_distancias_uc is
     type tipo_estado is (
         inicial,
         gera_pulso_medida, aguarda_fim_medida,
-        registra_medida_realizada,
-        verifica_fim_medidas,
-        incrementa_contador_medida, espera_1ms,
-        registra_medida_final,
-        final, espera_1ms_fim
+        registra_medida_realizada, verifica_fim_medidas,
+        incrementa_contador_medida, espera_20ms,
+        registra_medida_final, final, espera_20ms_fim
     );
 
     signal Eatual, Eprox: tipo_estado;
@@ -51,7 +48,7 @@ begin
     end process;
 
     -- logica de proximo estado
-    process (echo, fim_medida, fim_contador_medida, fim_timer_1ms, fim_timer_distMax, Eatual) 
+    process (fim_medida, fim_contador_medida, fim_timer_20ms, fim_timer_distMax, Eatual) 
     begin
 
         case Eatual is
@@ -73,20 +70,20 @@ begin
                 else                                Eprox <= incrementa_contador_medida;
                 end if;
             
-            when incrementa_contador_medida =>      Eprox <= espera_1ms;
+            when incrementa_contador_medida =>      Eprox <= espera_20ms;
 
-            when espera_1ms =>
-                if fim_timer_1ms='1' then           Eprox <= gera_pulso_medida;
-                else                                Eprox <= espera_1ms;
+            when espera_20ms =>
+                if fim_timer_20ms='1' then          Eprox <= gera_pulso_medida;
+                else                                Eprox <= espera_20ms;
                 end if;
 
             when registra_medida_final      =>      Eprox <= final;
 
-            when final                      =>      Eprox <= espera_1ms_fim;
+            when final                      =>      Eprox <= espera_20ms_fim;
 
-            when espera_1ms_fim =>
-                if fim_timer_1ms='1' then           Eprox <= inicial;
-                else                                Eprox <= espera_1ms_fim;
+            when espera_20ms_fim =>
+                if fim_timer_20ms='1' then          Eprox <= inicial;
+                else                                Eprox <= espera_20ms_fim;
                 end if;
 
             when others                     =>      Eprox <= inicial;
@@ -112,7 +109,7 @@ begin
         conta_medida        <= '1' when incrementa_contador_medida, '0' when others;  
 
     with Eatual select
-        conta_1ms           <= '1' when espera_1ms, '1' when espera_1ms_fim, '0' when others;  
+        conta_20ms          <= '1' when espera_20ms, '1' when espera_20ms_fim, '0' when others;  
 
     with Eatual select
         registra_final      <= '1' when registra_medida_final, '0' when others;    

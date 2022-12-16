@@ -8,10 +8,10 @@ entity comparador_de_distancias is
         constant DistMax_mm : integer := 500  
     );
     port (
-        dist1           : in  std_logic_vector (15 downto 0);
-        dist2           : in  std_logic_vector (15 downto 0);
-        dist3           : in  std_logic_vector (15 downto 0);
-        dist4           : in  std_logic_vector (15 downto 0);
+        dist1   : in  std_logic_vector (15 downto 0);
+        dist2   : in  std_logic_vector (15 downto 0);
+        dist3   : in  std_logic_vector (15 downto 0);
+        dist4   : in  std_logic_vector (15 downto 0);
 
         resultadoInt    : out std_logic_vector ( 9 downto 0);
         resultadoBCD    : out std_logic_vector (15 downto 0)

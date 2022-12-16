@@ -5,14 +5,14 @@ use ieee.numeric_std.all;
 
 entity rx_serial_7E2_fd is
     port (
-        clock               : in  std_logic;
-        reset               : in  std_logic;
-        zera                : in  std_logic;
-        conta_rx            : in  std_logic;
-        registra            : in  std_logic;
-        desloca             : in  std_logic;
-        dado_serial         : in  std_logic;
-        tem_dado            : in  std_logic;
+        clock       : in  std_logic;
+        reset       : in  std_logic;
+        zera        : in  std_logic;
+        conta_rx    : in  std_logic;
+        registra    : in  std_logic;
+        desloca     : in  std_logic;
+        dado_serial : in  std_logic;
+        tem_dado    : in  std_logic;
 
         fim_rx              : out std_logic;
         paridade_recebida   : out std_logic;

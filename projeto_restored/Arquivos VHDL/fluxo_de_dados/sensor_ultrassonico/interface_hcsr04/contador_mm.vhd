@@ -22,13 +22,13 @@ architecture contador_mm_arch of contador_mm is
 
     component contador_mm_uc is 
     port ( 
-        clock       : in  std_logic;
-        reset       : in  std_logic;
-        pulso       : in  std_logic;
+        clock   : in  std_logic;
+        reset   : in  std_logic;
+        pulso   : in  std_logic;
 
-        zera        : out std_logic;
-        conta       : out std_logic;
-        pronto      : out std_logic
+        zera    : out std_logic;
+        conta   : out std_logic;
+        pronto  : out std_logic
     );
     end component;
 
@@ -89,13 +89,13 @@ architecture contador_mm_arch of contador_mm is
 begin
     UC: contador_mm_uc  
     port map ( 
-        clock       => clock,
-        reset       => reset,
-        pulso       => pulso,
+        clock   => clock,
+        reset   => reset,
+        pulso   => pulso,
 
-        zera        => s_zera,
-        conta       => s_conta,
-        pronto      => pronto
+        zera    => s_zera,
+        conta   => s_conta,
+        pronto  => pronto
     );
 
     s_reset <= reset or s_zera;

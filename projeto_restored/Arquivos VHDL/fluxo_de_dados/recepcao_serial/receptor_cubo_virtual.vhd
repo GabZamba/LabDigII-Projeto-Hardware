@@ -88,9 +88,9 @@ begin
 
     ReceptorSerial: rx_serial_7E2
         port map (
-            clock               => clock,
-            reset               => reset,
-            dado_serial         => dado_serial,
+            clock       => clock,
+            reset       => reset,
+            dado_serial => dado_serial,
     
             dados_ascii         => s_dado_ascii,
             paridade_recebida   => open,

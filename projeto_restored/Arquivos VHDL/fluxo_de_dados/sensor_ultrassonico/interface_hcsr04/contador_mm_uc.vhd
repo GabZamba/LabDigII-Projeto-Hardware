@@ -19,13 +19,13 @@ use ieee.std_logic_1164.all;
 
 entity contador_mm_uc is 
     port ( 
-        clock       : in  std_logic;
-        reset       : in  std_logic;
-        pulso       : in  std_logic;
+        clock   : in  std_logic;
+        reset   : in  std_logic;
+        pulso   : in  std_logic;
 
-        zera        : out std_logic:= '0';
-        conta       : out std_logic:= '0';
-        pronto      : out std_logic:= '0'
+        zera    : out std_logic:= '0';
+        conta   : out std_logic:= '0';
+        pronto  : out std_logic:= '0'
     );
 end contador_mm_uc;
 
