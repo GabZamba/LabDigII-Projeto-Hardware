@@ -116,24 +116,6 @@ architecture arch of projeto_fd is
             meio  : out std_logic
         );
     end component;
-
-    component mux_8x1_n is
-        generic (
-            constant BITS: integer := 4
-        );
-        port ( 
-            D0      : in  std_logic_vector (BITS-1 downto 0);
-            D1      : in  std_logic_vector (BITS-1 downto 0);
-            D2      : in  std_logic_vector (BITS-1 downto 0);
-            D3      : in  std_logic_vector (BITS-1 downto 0);
-            D4      : in  std_logic_vector (BITS-1 downto 0);
-            D5      : in  std_logic_vector (BITS-1 downto 0);
-            D6      : in  std_logic_vector (BITS-1 downto 0);
-            D7      : in  std_logic_vector (BITS-1 downto 0);
-            SEL     : in  std_logic_vector (2 downto 0);
-            MUX_OUT : out std_logic_vector (BITS-1 downto 0)
-        );
-    end component;
     
     component componente_de_transmissao is
         port (
@@ -255,10 +237,6 @@ begin
             distancia_cubo_BCD  => s_distancia_BCD_cubo_virtual,
             pronto              => open
         );
-    -- s_distancia_int_cubo_virtual <= std_logic_vector(to_unsigned(250, 10));
-    -- s_distancia_BCD_cubo_virtual <= "0000 0010 0101 0000"; --300
-    -- s_distancia_BCD_cubo_virtual <= "0000001100000000"; --250
-
         
     ReceptorPID: receptor_serial_pid
         port map (

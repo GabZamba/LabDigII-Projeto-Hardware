@@ -21,7 +21,7 @@ end entity;
 architecture fsm_arch of componente_de_transmissao_uc is
 
     type tipo_estado is (
-        inicial, preparacao, zera_contador_transmissao,
+        inicial, preparacao,
         inicia_transmissao, aguarda_transmissao, 
         incrementa_mux_tx,
         final
@@ -52,9 +52,7 @@ begin
                 if      partida='1'         then        Eprox <= preparacao;
                 else                                    Eprox <= inicial;
                 end if;
-            when preparacao                         =>  Eprox <= zera_contador_transmissao;
-
-            when zera_contador_transmissao          =>  Eprox <= inicia_transmissao;
+            when preparacao                         =>  Eprox <= inicia_transmissao;
 
             when inicia_transmissao                 =>  Eprox <= aguarda_transmissao;
 
@@ -76,7 +74,7 @@ begin
 
   -- saidas de controle 
     with Eatual select
-        zera_contador_tx    <= '1' when zera_contador_transmissao, '0' when others;
+        zera_contador_tx    <= '1' when preparacao, '0' when others;
 
     with Eatual select
         partida_tx          <= '1' when inicia_transmissao, '0' when others;
